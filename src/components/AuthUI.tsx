@@ -3,7 +3,8 @@
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 
 const GoogleIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className}>
@@ -20,8 +21,8 @@ interface AuthUIProps {
 
 export default function AuthUI({ mode }: AuthUIProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
-  // Also checking query param if needed, but primary is the mode prop passed from the page
   const queryMode = searchParams?.get('mode');
   const resolvedMode = (queryMode as 'login' | 'signup') || mode;
   
@@ -30,10 +31,102 @@ export default function AuthUI({ mode }: AuthUIProps) {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Sync mode if it changes
+  // Form States
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  
+  // Status States
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
   useEffect(() => {
     setIsRightPanelActive(resolvedMode === 'signup');
+    setError(null);
+    setSuccessMsg(null);
   }, [resolvedMode]);
+
+  // Handle Sign Up
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    const supabase = createClient();
+    
+    const { error: signUpError, data } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          full_name: fullName,
+        }
+      }
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+    } else {
+      // If email confirmations are enabled, the session will be null
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError("This email is already in use.");
+      } else if (!data.session) {
+        setSuccessMsg("Success! Please check your email for a confirmation link.");
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setFullName('');
+      } else {
+        // If email confirmation is off, they are logged in automatically
+        router.push('/dashboard');
+        router.refresh();
+      }
+    }
+    setLoading(false);
+  };
+
+  // Handle Login
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const supabase = createClient();
+    
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
+    } else {
+      router.push('/dashboard');
+      router.refresh();
+    }
+  };
+
+  // Google OAuth Placeholder
+  const handleGoogleAuth = async () => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#080c14] text-white flex justify-center items-center font-sans relative overflow-hidden py-0">
@@ -64,16 +157,32 @@ export default function AuthUI({ mode }: AuthUIProps) {
 
             <h1 className="font-space font-bold text-xl mb-3 text-white tracking-tight">Create your account</h1>
             
-            <form className="w-full max-w-[320px] flex flex-col items-center">
+            {error && isRightPanelActive && (
+              <div className="w-full max-w-[320px] bg-red-500/10 border border-red-500/50 text-red-400 text-xs px-3 py-2 rounded-lg mb-3">
+                {error}
+              </div>
+            )}
+            
+            {successMsg && isRightPanelActive && (
+              <div className="w-full max-w-[320px] bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-xs px-3 py-2 rounded-lg mb-3">
+                {successMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleSignup} className="w-full max-w-[320px] flex flex-col items-center">
               <input 
                 type="text" 
                 placeholder="Full Name" 
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
                 required
               />
               <input 
                 type="email" 
                 placeholder="Email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
                 required
               />
@@ -81,6 +190,8 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 <input 
                   type={showSignupPassword ? "text" : "password"} 
                   placeholder="Password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
                   required
                 />
@@ -96,6 +207,8 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 <input 
                   type={showConfirmPassword ? "text" : "password"} 
                   placeholder="Confirm Password" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
                   required
                 />
@@ -110,9 +223,10 @@ export default function AuthUI({ mode }: AuthUIProps) {
               
               <button 
                 type="submit" 
-                className="rounded-xl border border-violet-700 bg-violet-700 text-white font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)]"
+                disabled={loading}
+                className="rounded-xl border border-violet-700 bg-violet-700 text-white font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)] disabled:opacity-50 disabled:pointer-events-none"
               >
-                Create Account
+                {loading ? 'Creating...' : 'Create Account'}
               </button>
 
               <div className="flex items-center w-full my-3 opacity-60">
@@ -123,6 +237,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
 
               <button 
                 type="button" 
+                onClick={handleGoogleAuth}
                 className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1120] text-white font-semibold text-[13px] w-full py-2.5 hover:bg-white/5 transition-all active:scale-[0.98]"
               >
                 <GoogleIcon className="w-4 h-4" />
@@ -152,10 +267,18 @@ export default function AuthUI({ mode }: AuthUIProps) {
             <h1 className="font-space font-bold text-xl text-white tracking-tight mb-1">Login</h1>
             <p className="text-[12px] text-slate-400 mb-4 font-medium">Split expenses with friends effortlessly</p>
             
-            <form className="w-full max-w-[320px] flex flex-col items-center">
+            {error && !isRightPanelActive && (
+              <div className="w-full max-w-[320px] bg-red-500/10 border border-red-500/50 text-red-400 text-xs px-3 py-2 rounded-lg mb-3">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="w-full max-w-[320px] flex flex-col items-center">
               <input 
                 type="email" 
                 placeholder="Email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
                 required
               />
@@ -163,7 +286,9 @@ export default function AuthUI({ mode }: AuthUIProps) {
               <div className="relative w-full mb-1">
                 <input 
                   type={showLoginPassword ? "text" : "password"} 
-                  placeholder="Password" 
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)} 
                   className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
                   required
                 />
@@ -184,9 +309,10 @@ export default function AuthUI({ mode }: AuthUIProps) {
               
               <button 
                 type="submit" 
-                className="rounded-xl border border-violet-700 bg-violet-700 text-white font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)]"
+                disabled={loading}
+                className="rounded-xl border border-violet-700 bg-violet-700 text-white font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)] disabled:opacity-50 disabled:pointer-events-none"
               >
-                Login
+                {loading ? 'Logging in...' : 'Login'}
               </button>
 
               <div className="flex items-center w-full my-4 opacity-60">
@@ -197,6 +323,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
 
               <button 
                 type="button" 
+                onClick={handleGoogleAuth}
                 className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1120] text-white font-semibold text-[13px] w-full py-2.5 hover:bg-white/5 transition-all active:scale-[0.98]"
               >
                 <GoogleIcon className="w-4 h-4" />
@@ -234,7 +361,11 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 Already have an account? Login to keep connected with your groups.
               </p>
               <button 
-                onClick={() => setIsRightPanelActive(false)} 
+                onClick={() => {
+                  setIsRightPanelActive(false);
+                  setError(null);
+                  setSuccessMsg(null);
+                }} 
                 className="rounded-xl border border-white/80 bg-transparent text-white font-bold text-[12px] px-8 py-2.5 uppercase tracking-[0.1em] hover:bg-white/10 hover:border-white transition-all active:scale-95 w-full max-w-[160px]"
               >
                 Login
@@ -254,7 +385,11 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 Don't have an account? Sign up to start tracking shared expenses with us.
               </p>
               <button 
-                onClick={() => setIsRightPanelActive(true)} 
+                onClick={() => {
+                  setIsRightPanelActive(true);
+                  setError(null);
+                  setSuccessMsg(null);
+                }} 
                 className="rounded-xl border border-white/80 bg-transparent text-white font-bold text-[12px] px-8 py-2.5 uppercase tracking-[0.1em] hover:bg-white/10 hover:border-white transition-all active:scale-95 w-full max-w-[160px]"
               >
                 Sign Up
