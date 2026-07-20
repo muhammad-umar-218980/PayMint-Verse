@@ -4,7 +4,7 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 
 const GoogleIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className}>
