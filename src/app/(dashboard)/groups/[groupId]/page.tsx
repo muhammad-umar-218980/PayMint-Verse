@@ -8,6 +8,10 @@ import { ExpenseService } from '@/features/expenses/services/expense.service';
 import AddExpenseModal from '@/features/expenses/components/AddExpenseModal';
 import ExpenseList from '@/features/expenses/components/ExpenseList';
 import BalancesCard from '@/features/balances/components/BalancesCard';
+import { AnalyticsService } from '@/features/analytics/services/analytics.service';
+import CategoryPieChart from '@/features/analytics/components/CategoryPieChart';
+import ExportButton from '@/features/analytics/components/ExportButton';
+import { ExpenseRepository } from '@/features/expenses/repositories/expense.repository';
 
 export default async function GroupPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
@@ -33,6 +37,12 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
     acc[member.user_id] = member.profile?.full_name || member.profile?.email || 'Unknown';
     return acc;
   }, {} as Record<string, string>);
+
+  const analyticsService = new AnalyticsService();
+  const categoryData = await analyticsService.getCategoryBreakdown(groupId);
+
+  const expenseRepo = new ExpenseRepository();
+  const expenses = await expenseRepo.getExpensesForGroup(groupId);
 
   return (
     <div className="px-6 lg:px-10 py-8 lg:pt-10 pt-[80px]">
@@ -91,6 +101,36 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
         {/* Right Column: Balances */}
         <div className="lg:col-span-1">
           <BalancesCard groupId={group.id} membersMap={membersMap} currentUserId={user.id} />
+        </div>
+      </div>
+
+      {/* Analytics & Insights Section */}
+      <div className="mt-8 border-t border-white/5 pt-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h2 className="font-space text-xl font-bold text-white">Insights</h2>
+            <p className="text-slate-400 text-sm mt-1">Group spending breakdown and data export.</p>
+          </div>
+          <ExportButton expenses={expenses} groupName={group.name} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Category Breakdown */}
+          <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-6">
+            <h3 className="font-space font-bold text-white mb-6 flex items-center gap-2">
+              Spending by Category
+            </h3>
+            <CategoryPieChart data={categoryData} />
+          </div>
+
+          {/* Reserved for future analytics (e.g. Monthly Trend) */}
+          <div className="bg-[#151f30]/50 border border-violet-900/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+             <div className="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-4">
+                <Receipt className="w-6 h-6 text-slate-500" />
+             </div>
+             <p className="text-slate-400 font-medium mb-1">More insights coming soon</p>
+             <p className="text-slate-500 text-sm">Monthly trends and individual spending habits will appear here.</p>
+          </div>
         </div>
       </div>
     </div>
