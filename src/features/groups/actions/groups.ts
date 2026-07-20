@@ -3,8 +3,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { GroupService } from '../services/group.service';
+import { ActivityService } from '@/features/activities/services/activity.service';
 
 const groupService = new GroupService();
+const activityService = new ActivityService();
 
 export async function createGroup(formData: FormData) {
   const supabase = await createClient();
@@ -55,6 +57,9 @@ export async function addMemberAction(groupId: string, email: string) {
     }
     return { error: 'Failed to add member to group. Make sure you are the group owner.' };
   }
+
+  // Log activity
+  await activityService.logMemberAdded(user.id, groupId, profileToInvite.id);
 
   revalidatePath(`/groups/${groupId}`);
   return { success: true };

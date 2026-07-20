@@ -3,9 +3,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { ExpenseService } from '../services/expense.service';
+import { ActivityService } from '@/features/activities/services/activity.service';
 import { SplitType } from '@/types';
 
 const expenseService = new ExpenseService();
+const activityService = new ActivityService();
 
 export async function addExpenseAction(formData: FormData, splitType: SplitType, splitDetails: any[]) {
   const supabase = await createClient();
@@ -46,6 +48,9 @@ export async function addExpenseAction(formData: FormData, splitType: SplitType,
     return { error: result.error };
   }
 
+  // Log activity
+  await activityService.logExpenseCreated(user.id, result as any);
+
   revalidatePath(`/groups/${groupId}`);
   return { success: true };
 }
@@ -64,6 +69,9 @@ export async function deleteExpenseAction(expenseId: string, groupId: string) {
   if (!success) {
     return { error: 'Failed to delete expense or permission denied' };
   }
+
+  // Log activity
+  await activityService.logExpenseDeleted(user.id, groupId, 'an expense');
 
   revalidatePath(`/groups/${groupId}`);
   return { success: true };

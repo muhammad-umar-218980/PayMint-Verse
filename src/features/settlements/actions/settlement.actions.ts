@@ -3,9 +3,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { SettlementService } from '../services/settlement.service';
+import { ActivityService } from '@/features/activities/services/activity.service';
 import { SettlementMethod } from '@/types';
 
 const settlementService = new SettlementService();
+const activityService = new ActivityService();
 
 export async function recordSettlementAction(formData: FormData) {
   const supabase = await createClient();
@@ -42,6 +44,11 @@ export async function recordSettlementAction(formData: FormData) {
 
   if (result.error) {
     return { error: result.error };
+  }
+
+  // Log activity
+  if (result.settlement) {
+    await activityService.logSettlementRecorded(user.id, result.settlement as any);
   }
 
   revalidatePath(`/groups/${groupId}`);
