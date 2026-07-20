@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { createGroup } from '@/app/actions/groups';
+import { createGroup } from '@/features/groups/actions/groups';
 
 export default function CreateGroupModal() {
   const [open, setOpen] = useState(false);
@@ -17,8 +17,7 @@ export default function CreateGroupModal() {
     setError(null);
     setLoading(true);
 
-    const formData = new FormData();
-    formData.set('name', name);
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
 
     const result = await createGroup(formData);
 
@@ -65,11 +64,18 @@ export default function CreateGroupModal() {
               <input
                 type="text"
                 placeholder="Group name"
+                name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-4 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-sm"
                 required
                 autoFocus
+              />
+              <input
+                type="text"
+                placeholder="Description (optional)"
+                name="description"
+                className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-6 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-sm"
               />
 
               <div className="flex gap-3">
