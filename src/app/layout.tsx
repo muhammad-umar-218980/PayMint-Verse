@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
-        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+        <link rel="icon" type="image/svg+xml" href="/logo_green.svg" />
       </head>
       <body className="min-h-screen flex flex-col font-sans antialiased">
         {children}
