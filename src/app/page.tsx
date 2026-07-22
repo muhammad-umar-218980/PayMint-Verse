@@ -281,7 +281,7 @@ export default function HomePage() {
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[6%] h-[75px] bg-transparent border-b border-transparent transition-all duration-300"
       >
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Logo" className="w-8 h-8 drop-shadow-[0_0_8px_rgba(124,58,237,0.4)]" />
+          <img src="/logo_green.png" alt="Logo" className="w-8 h-8 drop-shadow-[0_0_8px_rgba(124,58,237,0.4)]" />
           <span className="font-space text-[22px] font-bold text-white">
             Pay<span className="text-violet-400">Mint</span> Verse
           </span>
@@ -710,7 +710,7 @@ export default function HomePage() {
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 mb-20">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img src="/logo.png" alt="Logo" className="w-7 h-7" />
+              <img src="/logo_green.png" alt="Logo" className="w-7 h-7" />
               <span className="font-space text-2xl font-bold text-white">
                 Pay<span className="text-violet-400">Mint</span> Verse
               </span>
