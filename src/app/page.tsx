@@ -257,7 +257,6 @@ function Nav() {
 
 function Hero() {
   const [playing, setPlaying] = useState(false);
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <section className="pm-hero">
@@ -276,17 +275,6 @@ function Hero() {
           <span className="pm-h1-line" data-split>Stop chasing people</span>
           <span className="pm-h1-line pm-h1-italic-row">
             <span data-split>for money.</span>
-            <button
-              className={`pm-video-inline ${expanded ? "is-expanded" : ""}`}
-              onClick={() => setExpanded((v) => !v)}
-              data-cursor-text={expanded ? "close" : "watch"}
-              aria-label="Product preview"
-            >
-              <MiniAppPreview />
-              <span className="pm-video-play">
-                {playing ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
-              </span>
-            </button>
             <span data-split>Start</span>
           </span>
           <span className="pm-h1-line pm-h1-italic" data-split>settling.</span>
@@ -318,23 +306,6 @@ function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function MiniAppPreview() {
-  return (
-    <div className="pm-mini-preview">
-      <div className="pm-mini-row">
-        <div className="pm-mini-avatar" style={{ background: EMERALD.primary }}>M</div>
-        <div className="pm-mini-bar" />
-        <div className="pm-mini-amt">$42</div>
-      </div>
-      <div className="pm-mini-row">
-        <div className="pm-mini-avatar" style={{ background: EMERALD.mint }}>A</div>
-        <div className="pm-mini-bar" style={{ width: "60%" }} />
-        <div className="pm-mini-amt">$28</div>
-      </div>
-    </div>
   );
 }
 
@@ -979,16 +950,7 @@ function StyleTag() {
       .pm-word { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1; padding-bottom: 0.06em; }
       .pm-word-inner { display: inline-block; }
 
-      .pm-video-inline { position: relative; display: inline-flex; width: clamp(130px, 15vw, 200px); height: clamp(52px, 6vw, 78px); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #fff; cursor: pointer; vertical-align: middle; transition: transform .5s cubic-bezier(.6,.05,.2,1), width .5s, height .5s; padding: 0; }
-      .pm-video-inline:hover { transform: translateY(-2px) rotate(-1deg); }
-      .pm-video-inline.is-expanded { width: clamp(230px, 22vw, 320px); height: clamp(88px, 9vw, 120px); }
-      .pm-video-play { position: absolute; bottom: 8px; right: 8px; width: 26px; height: 26px; background: var(--ink); color: var(--paper); border-radius: 999px; display: grid; place-items: center; }
 
-      .pm-mini-preview { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; height: 100%; justify-content: center; }
-      .pm-mini-row { display: flex; align-items: center; gap: 8px; }
-      .pm-mini-avatar { width: 22px; height: 22px; border-radius: 999px; color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; font-family: 'Inter'; }
-      .pm-mini-bar { flex: 1; height: 6px; border-radius: 999px; background: linear-gradient(90deg, ${EMERALD.primary}, ${EMERALD.mint}); width: 80%; }
-      .pm-mini-amt { font-family: 'Inter'; font-size: 11px; font-weight: 600; color: var(--ink); }
 
       .pm-hero-sub { max-width: 640px; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.55; color: rgba(6,46,35,0.7); }
       .pm-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
