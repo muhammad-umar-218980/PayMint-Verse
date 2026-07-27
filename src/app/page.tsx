@@ -26,6 +26,8 @@ import {
   Zap,
 } from "lucide-react";
 
+gsap.registerPlugin(ScrollTrigger);
+
 const EMERALD = {
   ink: "#062e23",
   primary: "#059669",
@@ -40,7 +42,6 @@ export default function Homepage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
       duration: 1.15,
