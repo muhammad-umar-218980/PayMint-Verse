@@ -151,20 +151,13 @@ export default function Homepage() {
 }
 
 function Nav() {
-  const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
-    let last = 0;
-    const onScroll = () => {
-      const y = window.scrollY;
-      setScrolled(y > 30);
-      setHidden(y > last && y > 140);
-      last = y;
-    };
+    const onScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -174,7 +167,7 @@ function Nav() {
   return (
     <>
     <nav
-      className={`pm-nav ${hidden ? "is-hidden" : ""} ${scrolled ? "is-scrolled" : ""}`}
+      className={`pm-nav ${scrolled ? "is-scrolled" : ""}`}
       data-cursor-text=""
     >
       <div className="pm-nav-inner">
