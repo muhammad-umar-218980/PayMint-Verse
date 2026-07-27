@@ -155,6 +155,8 @@ function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
     let last = 0;
     const onScroll = () => {
@@ -231,31 +233,20 @@ function Nav() {
       </div>
     </nav>
 
-    {typeof document !== "undefined" && createPortal(
+    {mounted && createPortal(
       <div className={`pm-mobile-menu ${mobileOpen ? "is-open" : ""}`}>
         <div className="pm-mobile-overlay" onClick={closeMobile} />
         <div className="pm-mobile-panel">
           <a href="#features" className="pm-mobile-link" onClick={closeMobile}>Features</a>
           <a href="#how" className="pm-mobile-link" onClick={closeMobile}>How it works</a>
-          <div className="pm-mobile-link pm-mobile-link-label">Product</div>
-          <div className="pm-mobile-sublinks">
-            <a href="#features" onClick={closeMobile}>
-              <Scale size={16} /> Smart splitting
-            </a>
-            <a href="#features" onClick={closeMobile}>
-              <Zap size={16} /> Debt simplification
-            </a>
-            <a href="#features" onClick={closeMobile}>
-              <BarChart3 size={16} /> Analytics
-            </a>
-            <a href="#features" onClick={closeMobile}>
-              <Users size={16} /> Groups
-            </a>
-          </div>
-          <div className="pm-mobile-actions">
-            <Link href="/auth/login" className="pm-mobile-login" onClick={closeMobile}>Login</Link>
-            <Link href="/auth/signup" className="pm-mobile-signup" onClick={closeMobile}>Get started</Link>
-          </div>
+          <div className="pm-mobile-sep" />
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Scale size={16} /> Smart splitting</a>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Zap size={16} /> Debt simplification</a>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><BarChart3 size={16} /> Analytics</a>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Users size={16} /> Groups</a>
+          <div className="pm-mobile-auth-sep" />
+          <Link href="/auth/login" className="pm-mobile-login" onClick={closeMobile}>Login</Link>
+          <Link href="/auth/signup" className="pm-mobile-signup" onClick={closeMobile}>Get started</Link>
         </div>
       </div>,
       document.body,
@@ -950,17 +941,14 @@ function StyleTag() {
       .pm-hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
       .pm-mobile-menu { position: fixed; inset: 0; z-index: 101; opacity: 0; pointer-events: none; transition: opacity .35s; }
       .pm-mobile-menu.is-open { opacity: 1; pointer-events: auto; }
-      .pm-mobile-overlay { position: absolute; inset: 0; background: rgba(6,46,35,0.3); }
-      .pm-mobile-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(320px, 80vw); background: #fff; padding: 80px 24px 24px; display: flex; flex-direction: column; gap: 6px; transform: translateX(100%); transition: transform .4s cubic-bezier(.6,.05,.2,1); overflow-y: auto; }
+      .pm-mobile-overlay { position: fixed; inset: 0; background: rgba(6,46,35,0.55); }
+      .pm-mobile-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 80vw); background: #fff; padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 2px; transform: translateX(100%); transition: transform .4s cubic-bezier(.6,.05,.2,1); overflow-y: auto; }
       .pm-mobile-menu.is-open .pm-mobile-panel { transform: translateX(0); }
       .pm-mobile-link { display: flex; align-items: center; gap: 10px; padding: 12px 14px; font-size: 15px; font-weight: 500; color: var(--ink); text-decoration: none; border-radius: 14px; transition: background .2s; }
       .pm-mobile-link:hover { background: rgba(6,46,35,0.05); }
-      .pm-mobile-link-label { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: rgba(6,46,35,0.5); font-weight: 600; padding: 16px 14px 8px; pointer-events: none; }
-      .pm-mobile-sublinks { display: flex; flex-direction: column; gap: 2px; margin: 0 0 8px; padding-left: 12px; border-left: 1px solid var(--line); }
-      .pm-mobile-sublinks a { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 14px; color: var(--ink); text-decoration: none; border-radius: 12px; transition: background .2s; }
-      .pm-mobile-sublinks a:hover { background: rgba(6,46,35,0.05); }
-      .pm-mobile-sublinks svg { width: 16px; height: 16px; color: var(--primary); }
-      .pm-mobile-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+      .pm-mobile-link svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
+      .pm-mobile-sep { height: 1px; background: var(--line); margin: 6px 14px; }
+      .pm-mobile-auth-sep { height: 1px; background: var(--line); margin: 12px 14px 8px; }
       .pm-mobile-login { display: block; text-align: center; padding: 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; transition: background .2s; }
       .pm-mobile-login:hover { background: rgba(6,46,35,0.05); }
       .pm-mobile-signup { display: block; text-align: center; padding: 12px; border-radius: 999px; background: var(--ink); color: var(--paper); text-decoration: none; font-size: 15px; font-weight: 500; transition: background .3s; }
