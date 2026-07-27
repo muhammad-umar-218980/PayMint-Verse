@@ -240,6 +240,7 @@ function Nav() {
           <a href="#features" className="pm-mobile-link" onClick={closeMobile}>Features</a>
           <a href="#how" className="pm-mobile-link" onClick={closeMobile}>How it works</a>
           <div className="pm-mobile-sep" />
+          <span className="pm-mobile-label">Product</span>
           <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Scale size={16} /> Smart splitting</a>
           <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Zap size={16} /> Debt simplification</a>
           <a href="#features" className="pm-mobile-link" onClick={closeMobile}><BarChart3 size={16} /> Analytics</a>
@@ -883,7 +884,7 @@ function Footer() {
 function StyleTag() {
   return (
     <style>{`
-      .pm-root {
+      :root {
         --ink: ${EMERALD.ink};
         --primary: ${EMERALD.primary};
         --secondary: ${EMERALD.secondary};
@@ -891,7 +892,11 @@ function StyleTag() {
         --light: ${EMERALD.light};
         --paper: ${EMERALD.paper};
         --line: rgba(6,46,35,0.09);
+      }
+      .pm-root, .pm-mobile-menu {
         font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      .pm-root {
         color: var(--ink);
         background: var(--paper);
         overflow-x: hidden;
@@ -948,6 +953,7 @@ function StyleTag() {
       .pm-mobile-link:hover { background: rgba(6,46,35,0.05); }
       .pm-mobile-link svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
       .pm-mobile-sep { height: 1px; background: var(--line); margin: 6px 14px; }
+      .pm-mobile-label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: rgba(6,46,35,0.5); padding: 8px 14px 4px; }
       .pm-mobile-auth-sep { height: 1px; background: var(--line); margin: 12px 14px 8px; }
       .pm-mobile-login { display: block; text-align: center; padding: 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; transition: background .2s; }
       .pm-mobile-login:hover { background: rgba(6,46,35,0.05); }
