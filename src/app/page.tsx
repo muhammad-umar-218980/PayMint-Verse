@@ -1,1052 +1,1134 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import Link from "next/link";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import {
   ArrowRight,
-  Wallet,
+  ArrowUpRight,
+  Play,
+  Pause,
   Users,
-  PieChart as PieChartIcon,
-  History,
+  Receipt,
+  Scale,
+  Wallet,
+  BarChart3,
   ShieldCheck,
-  Split,
-  Landmark,
-  Lock,
-  KeyRound,
-  ServerCog,
+  Sparkles,
+  Plus,
+  Check,
   ChevronDown,
-} from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  Tooltip,
-} from 'recharts';
+  Utensils,
+  Plane,
+  Home as HomeIcon,
+  Zap,
+} from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+const EMERALD = {
+  ink: "#062e23",
+  primary: "#059669",
+  secondary: "#10B981",
+  mint: "#34D399",
+  light: "#6EE7B7",
+  paper: "#F5F7F4",
+};
 
-/* ------------------------------------------------------------------ */
-/*  Brand tokens                                                       */
-/* ------------------------------------------------------------------ */
-// Primary Emerald   #059669   Secondary Emerald #10B981
-// Accent Mint       #34D399   Light Mint        #6EE7B7
-// Dark Slate        #0F172A   Light Background  #F8FAFC
-
-/* ------------------------------------------------------------------ */
-/*  Reveal hook — GSAP + ScrollTrigger, free-tier only (no SplitText)  */
-/* ------------------------------------------------------------------ */
-function useRevealGroup(selector: string, opts?: { stagger?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
+export default function Homepage() {
+  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
-    const els = ref.current.querySelectorAll(selector);
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        els,
-        { y: 32, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.9,
-          ease: 'power3.out',
-          stagger: opts?.stagger ?? 0.1,
-          scrollTrigger: {
-            trigger: ref.current,
-            start: 'top 78%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
-    }, ref);
-    return () => ctx.revert();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
 
-  return ref;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Smooth scroll (Lenis <-> ScrollTrigger)                            */
-/* ------------------------------------------------------------------ */
-function useLenis() {
-  useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
-
-    lenis.on('scroll', ScrollTrigger.update);
-
-    let raf: number;
-    function loop(time: number) {
+    lenis.on("scroll", ScrollTrigger.update);
+    const raf = (time: number) => {
       lenis.raf(time);
-      raf = requestAnimationFrame(loop);
-    }
-    raf = requestAnimationFrame(loop);
+      requestAnimationFrame(raf);
+    };
+    const id = requestAnimationFrame(raf);
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(id);
       lenis.destroy();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
-}
 
-/* ------------------------------------------------------------------ */
-/*  Magnetic button — small, restrained, no gimmick cursor             */
-/* ------------------------------------------------------------------ */
-function MagneticLink({
-  href,
-  className,
-  children,
-  ...rest
-}: {
-  href: string;
-  className?: string;
-  children: React.ReactNode;
-  [key: string]: any;
-}) {
-  const ref = useRef<HTMLAnchorElement>(null);
+  useLayoutEffect(() => {
+    if (!root.current) return;
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { y: 60, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%" },
+          },
+        );
+      });
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+      gsap.utils.toArray<HTMLElement>("[data-split]").forEach((el) => {
+        const words = el.innerText.split(/(\s+)/);
+        el.innerHTML = words
+          .map((w) =>
+            w.trim()
+              ? `<span class="pm-word"><span class="pm-word-inner">${w}</span></span>`
+              : w,
+          )
+          .join("");
+        const inners = el.querySelectorAll<HTMLElement>(".pm-word-inner");
+        gsap.fromTo(
+          inners,
+          { yPercent: 110 },
+          {
+            yPercent: 0,
+            duration: 1,
+            ease: "power4.out",
+            stagger: 0.05,
+            scrollTrigger: { trigger: el, start: "top 85%" },
+          },
+        );
+      });
 
-    function onMove(e: MouseEvent) {
-      const rect = el!.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      gsap.to(el, { x: x * 0.25, y: y * 0.35, duration: 0.4, ease: 'power3.out' });
-    }
-    function onLeave() {
-      gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
-    }
+      gsap.utils.toArray<HTMLElement>("[data-stagger]").forEach((container) => {
+        const items = container.querySelectorAll<HTMLElement>("[data-stagger-item]");
+        gsap.fromTo(
+          items,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "power3.out",
+            stagger: 0.08,
+            scrollTrigger: { trigger: container, start: "top 82%" },
+          },
+        );
+      });
 
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
-    return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
-    };
+      gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
+        const speed = Number(el.dataset.parallax || 0.3);
+        gsap.to(el, {
+          yPercent: -speed * 100,
+          ease: "none",
+          scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+    }, root);
+    return () => ctx.revert();
   }, []);
 
   return (
-    <Link href={href} ref={ref} className={className} {...rest}>
-      {children}
-    </Link>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  CUSTOM CURSOR — marquee text + jelly click                         */
-/*  Desktop (fine pointer) only. Tag any element with                  */
-/*  data-cursor-text="View" to have the cursor label itself over it.   */
-/* ------------------------------------------------------------------ */
-function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const [label, setLabel] = useState('');
-  const [active, setActive] = useState(false);
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    const isFine = window.matchMedia('(pointer: fine)').matches;
-    setEnabled(isFine);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled || !cursorRef.current) return;
-
-    const xTo = gsap.quickTo(cursorRef.current, 'x', { duration: 0.35, ease: 'power3' });
-    const yTo = gsap.quickTo(cursorRef.current, 'y', { duration: 0.35, ease: 'power3' });
-
-    let activeEl: HTMLElement | null = null;
-
-    function onMove(e: MouseEvent) {
-      xTo(e.clientX);
-      yTo(e.clientY);
-      const hit = (e.target as HTMLElement)?.closest<HTMLElement>('[data-cursor-text]');
-      if (hit !== activeEl) {
-        activeEl = hit;
-        if (hit) {
-          setLabel(hit.dataset.cursorText || '');
-          setActive(true);
-        } else {
-          setActive(false);
-        }
-      }
-    }
-
-    function onDown() {
-      gsap.to(cursorRef.current, { scale: 0.82, duration: 0.12, ease: 'power2.out' });
-    }
-    function onUp() {
-      gsap.to(cursorRef.current, { scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.35)' });
-    }
-
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mousedown', onDown);
-    window.addEventListener('mouseup', onUp);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, [enabled]);
-
-  return (
-    <div
-      ref={cursorRef}
-      className={`fixed top-0 left-0 z-[999] pointer-events-none -translate-x-1/2 -translate-y-1/2 ${
-        enabled ? '' : 'hidden'
-      }`}
-    >
-      <div
-        className={`flex items-center justify-center rounded-full bg-[#059669] text-white text-[12px] font-semibold transition-[width,height] duration-300 ease-out overflow-hidden ${
-          active ? 'w-16 h-16' : 'w-5 h-5'
-        }`}
-      >
-        <span
-          className={`transition-opacity duration-200 whitespace-nowrap ${
-            active ? 'opacity-100 delay-100' : 'opacity-0'
-          }`}
-        >
-          {label}
-        </span>
-      </div>
+    <div ref={root} className="pm-root">
+      <StyleTag />
+      <Nav />
+      <Hero />
+      <TrustStrip />
+      <ProblemSolution />
+      <FeaturesDeepDive />
+      <SplitDemo />
+      <SimplifySection />
+      <AnalyticsSection />
+      <HowItWorks />
+      <StatsSection />
+      <FinalCTA />
+      <Footer />
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  PRODUCT DROPDOWN — illustrated feature cards on hover              */
-/* ------------------------------------------------------------------ */
-function ProductDropdown() {
-  const [open, setOpen] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-
+function Nav() {
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
   useEffect(() => {
-    if (!panelRef.current) return;
-    gsap.to(panelRef.current, {
-      opacity: open ? 1 : 0,
-      y: open ? 0 : 8,
-      pointerEvents: open ? 'auto' : 'none',
-      duration: 0.25,
-      ease: 'power2.out',
-    });
-  }, [open]);
-
-  const items = [
-    { icon: Wallet, title: 'Smart tracking', desc: 'Log any expense in seconds', href: '#features' },
-    { icon: PieChartIcon, title: 'Real-time balances', desc: 'Know who owes what, always', href: '#features' },
-    { icon: ArrowRight, title: 'Debt simplification', desc: 'Fewer payments, same result', href: '#features' },
-    { icon: Landmark, title: 'Flexible settlements', desc: 'Cash, bank, EasyPaisa, JazzCash', href: '#features' },
-  ];
-
-  return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <button className="flex items-center gap-1 hover:text-white transition-colors" data-cursor-text="View">
-        Product
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      <div
-        ref={panelRef}
-        className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[420px] bg-[#111C33] border border-white/10 rounded-2xl p-3 shadow-2xl shadow-black/40 opacity-0 pointer-events-none grid grid-cols-2 gap-1"
-      >
-        {items.map((item) => (
-          <a
-            key={item.title}
-            href={item.href}
-            className="flex flex-col gap-2 p-3 rounded-xl hover:bg-white/[0.06] transition-colors"
-          >
-            <div className="w-8 h-8 rounded-lg bg-[#10B981]/15 flex items-center justify-center">
-              <item.icon className="w-4 h-4 text-[#34D399]" />
-            </div>
-            <p className="text-[13px] font-semibold text-white">{item.title}</p>
-            <p className="text-[11.5px] text-slate-400 leading-snug">{item.desc}</p>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  NAV — hides on scroll down, reveals on scroll up                   */
-/* ------------------------------------------------------------------ */
-function Navbar() {
-  const barRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    let lastY = 0;
-    function onScroll() {
+    let last = 0;
+    const onScroll = () => {
       const y = window.scrollY;
-      if (!barRef.current) return;
-      if (y > lastY && y > 120) {
-        gsap.to(barRef.current, { yPercent: -100, duration: 0.4, ease: 'power2.out' });
-      } else {
-        gsap.to(barRef.current, { yPercent: 0, duration: 0.4, ease: 'power2.out' });
-      }
-      lastY = y;
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+      setScrolled(y > 30);
+      setHidden(y > last && y > 140);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <header
-      ref={barRef}
-      className="fixed top-0 inset-x-0 z-50 bg-[#0F172A]/70 backdrop-blur-md border-b border-white/[0.06]"
+    <nav
+      className={`pm-nav ${hidden ? "is-hidden" : ""} ${scrolled ? "is-scrolled" : ""}`}
+      data-cursor-text=""
     >
-      <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 lg:px-8 h-16">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/green logo.png" alt="PayMint Verse" width={30} height={30} className="rounded-lg" />
-          <span className="font-semibold text-white text-[16px] tracking-tight">
-            PayMint <span className="text-[#34D399]">Verse</span>
-          </span>
+      <div className="pm-nav-inner">
+        <Link href="/" className="pm-logo" data-cursor-text="home">
+          <LogoMark />
+          <span>PayMint<em>Verse</em></span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-[14px] font-medium text-slate-300">
-          <ProductDropdown />
-          <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
-          <a href="#security" className="hover:text-white transition-colors">Security</a>
-          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="hidden sm:inline-flex text-[14px] font-medium text-slate-300 hover:text-white transition-colors px-3 py-2">
-            Log in
-          </Link>
-          <MagneticLink
-            href="/auth/signup"
-            className="inline-flex items-center gap-1.5 bg-[#10B981] hover:bg-[#059669] text-[#0F172A] text-[14px] font-semibold px-4 py-2.5 rounded-full transition-colors"
-          >
-            Get started
-            <ArrowRight className="w-3.5 h-3.5" />
-          </MagneticLink>
-        </div>
-      </nav>
-    </header>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  HERO — dark, word-by-word reveal (no paid SplitText plugin)        */
-/* ------------------------------------------------------------------ */
-function Hero() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const ornamentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!wrapRef.current) return;
-    const ctx = gsap.context(() => {
-      const words = wrapRef.current!.querySelectorAll('.word');
-      gsap.fromTo(
-        words,
-        { yPercent: 120, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.9, ease: 'power4.out', stagger: 0.045, delay: 0.15 }
-      );
-      gsap.fromTo(
-        '.hero-sub, .hero-cta, .hero-badge',
-        { y: 18, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.55 }
-      );
-      gsap.fromTo(
-        '.hero-card',
-        { y: 40, opacity: 0, scale: 0.97 },
-        { y: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out', delay: 0.35 }
-      );
-
-      gsap.to(ornamentRef.current, {
-        yPercent: 25,
-        ease: 'none',
-        scrollTrigger: { trigger: wrapRef.current, start: 'top top', end: 'bottom top', scrub: 1 },
-      });
-    }, wrapRef);
-    return () => ctx.revert();
-  }, []);
-
-  const Word = ({ children }: { children: string }) => (
-    <span className="inline-block overflow-hidden align-bottom mr-[0.28em]">
-      <span className="word inline-block">{children}</span>
-    </span>
-  );
-
-  return (
-    <section ref={wrapRef} className="relative bg-[#0F172A] pt-40 pb-32 px-6 lg:px-8 overflow-hidden">
-      <div
-        ref={ornamentRef}
-        aria-hidden
-        className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full opacity-[0.14] blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #10B981 0%, #34D399 40%, transparent 70%)' }}
-      />
-
-      <div className="max-w-7xl mx-auto relative grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <div className="hero-badge inline-flex items-center gap-2 bg-white/[0.06] border border-white/10 text-[#6EE7B7] text-[13px] font-medium px-3 py-1.5 rounded-full mb-7">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
-            Trusted by 10,000+ groups
-          </div>
-
-          <h1 className="text-[46px] sm:text-[60px] leading-[1.04] font-bold tracking-tight text-white">
-            <div><Word>Stop</Word><Word>chasing</Word></div>
-            <div><Word>people</Word><Word>for</Word></div>
-            <div><span className="text-[#34D399]"><Word>money.</Word></span></div>
-          </h1>
-
-          <p className="hero-sub mt-7 text-[18px] leading-relaxed text-slate-400 max-w-md">
-            PayMint Verse tracks, splits, and settles group expenses
-            automatically — trips, rent, dinners, or team budgets — with
-            balances everyone can trust.
-          </p>
-
-          <div className="hero-cta mt-9 flex flex-wrap items-center gap-5">
-            <MagneticLink
-              href="/auth/signup"
-              className="inline-flex items-center gap-2 bg-[#10B981] hover:bg-[#059669] text-[#0F172A] font-semibold text-[15px] px-6 py-3.5 rounded-full transition-colors"
-            >
-              Create your first group
-              <ArrowRight className="w-4 h-4" />
-            </MagneticLink>
-            <a
-              href="#how-it-works"
-              data-cursor-text="Explore"
-              className="text-[15px] font-medium text-slate-300 hover:text-white transition-colors underline underline-offset-4 decoration-white/20"
-            >
-              See how it works
-            </a>
-          </div>
-        </div>
-
-        <div className="hero-card relative" data-cursor-text="Live">
-          <div className="relative bg-[#111C33] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/40 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-[12.5px] text-slate-500">Northern Trip</p>
-                <p className="text-[15px] font-semibold text-white">Group balance</p>
-              </div>
-              <div className="flex -space-x-2">
-                {['A', 'U', 'H'].map((l, i) => (
-                  <div
-                    key={l}
-                    className="w-8 h-8 rounded-full border-2 border-[#111C33] flex items-center justify-center text-[12px] font-semibold text-[#0F172A]"
-                    style={{ background: ['#34D399', '#10B981', '#6EE7B7'][i] }}
-                  >
-                    {l}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white/[0.04] rounded-xl p-4 mb-5 border border-white/[0.06]">
-              <p className="text-[12.5px] text-slate-500 mb-1">Total tracked</p>
-              <p className="text-[28px] font-bold text-white tracking-tight">Rs 84,200</p>
-            </div>
-
-            <div className="space-y-2.5">
-              <p className="text-[12px] font-semibold text-slate-500 uppercase tracking-wide">Settling up</p>
-              <div className="flex items-center gap-2 bg-[#10B981]/10 border border-[#10B981]/25 rounded-lg px-3 py-2.5">
-                <span className="font-semibold text-[13.5px] text-white">Ali</span>
-                <ArrowRight className="w-3.5 h-3.5 text-[#34D399]" />
-                <span className="font-semibold text-[13.5px] text-white">Umar</span>
-                <span className="ml-auto text-[13.5px] font-bold text-[#34D399]">Rs 12,000</span>
-              </div>
-              <p className="text-[12px] text-slate-500 pl-0.5">
-                Simplified from Ali → Ahmed → Umar automatically
-              </p>
-            </div>
-          </div>
-
+        <div className="pm-nav-links">
+          <a href="#features" className="pm-navlink"><span>Features</span></a>
+          <a href="#how" className="pm-navlink"><span>How it works</span></a>
           <div
-            aria-hidden
-            className="absolute -bottom-5 -left-5 w-16 h-16 rounded-2xl -z-10"
-            style={{ background: 'linear-gradient(135deg,#059669,#34D399)' }}
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  TRUST MARQUEE — infinite horizontal scroll, CSS-driven             */
-/* ------------------------------------------------------------------ */
-function TrustMarquee() {
-  const items = [
-    '10,000+ active groups',
-    'Rs 2M+ settled transparently',
-    '4 split methods',
-    'EasyPaisa & JazzCash support',
-    '99.9% uptime',
-    'Bank-level encryption',
-  ];
-  const loop = [...items, ...items];
-
-  return (
-    <section className="bg-[#0F172A] border-y border-white/[0.06] py-6 overflow-hidden">
-      <div className="flex w-max animate-[marquee_28s_linear_infinite]">
-        {loop.map((t, i) => (
-          <div key={i} className="flex items-center gap-3 px-8 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
-            <span className="text-[14px] font-medium text-slate-400 whitespace-nowrap">{t}</span>
-          </div>
-        ))}
-      </div>
-      <style>{`
-        @keyframes marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-      `}</style>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  PROBLEM -> SOLUTION — horizontal comparison, not two boxes         */
-/* ------------------------------------------------------------------ */
-function ProblemSolution() {
-  const ref = useRevealGroup('.ps-item');
-
-  return (
-    <section className="py-28 px-6 lg:px-8 bg-white">
-      <div className="max-w-6xl mx-auto" ref={ref}>
-        <p className="ps-item text-[13.5px] font-semibold text-[#059669] uppercase tracking-wide mb-3">
-          The problem
-        </p>
-        <h2 className="ps-item text-[34px] sm:text-[42px] font-bold text-[#0F172A] tracking-tight leading-tight max-w-2xl mb-16">
-          Shared money is messy. It shouldn&apos;t be.
-        </h2>
-
-        <div className="space-y-0">
-          {[
-            { before: 'Screenshots and sticky notes for who paid what', after: 'Every expense logged the moment it happens' },
-            { before: 'Payment chains nobody can untangle', after: 'Debts simplified into the fewest payments' },
-            { before: 'Awkward reminders to settle up', after: 'Balances update in real time, for everyone' },
-            { before: 'No record once cash changes hands', after: 'A transparent timeline, permanently' },
-          ].map((row, i) => (
-            <div
-              key={i}
-              className="ps-item grid md:grid-cols-2 gap-6 py-6 border-t border-slate-200 last:border-b"
-            >
-              <p className="text-[15px] text-slate-400">{row.before}</p>
-              <p className="text-[15px] font-medium text-[#0F172A] flex items-center gap-2">
-                <ArrowRight className="w-4 h-4 text-[#059669] shrink-0" />
-                {row.after}
-              </p>
+            className="pm-navlink pm-navlink-menu"
+            onMouseEnter={() => setOpenMenu(true)}
+            onMouseLeave={() => setOpenMenu(false)}
+          >
+            <span>Product <ChevronDown size={14} strokeWidth={2.4} /></span>
+            <div className={`pm-dropdown ${openMenu ? "is-open" : ""}`}>
+              {[
+                { t: "Smart splitting", d: "Four methods, one tap", icon: <Scale size={16} /> },
+                { t: "Debt simplification", d: "Fewest settlements", icon: <Zap size={16} /> },
+                { t: "Analytics", d: "See where money flows", icon: <BarChart3 size={16} /> },
+                { t: "Groups", d: "Trips, roommates, teams", icon: <Users size={16} /> },
+              ].map((i) => (
+                <a key={i.t} href="#features" className="pm-drop-item">
+                  <span className="pm-drop-icon">{i.icon}</span>
+                  <span>
+                    <strong>{i.t}</strong>
+                    <em>{i.d}</em>
+                  </span>
+                </a>
+              ))}
             </div>
-          ))}
+          </div>
+          <a href="#pricing" className="pm-navlink"><span>Pricing</span></a>
+        </div>
+
+        <a href="#cta" className="pm-cta-btn" data-cursor-text="get started">
+          <span>Get started</span>
+          <ArrowRight size={16} />
+        </a>
+      </div>
+    </nav>
+  );
+}
+
+function LogoMark() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="9" fill={EMERALD.ink} />
+      <path d="M8 22V10h6.5a4.5 4.5 0 010 9H12v3H8z" fill={EMERALD.mint} />
+      <circle cx="22" cy="12" r="2.5" fill={EMERALD.light} />
+    </svg>
+  );
+}
+
+function Hero() {
+  const [playing, setPlaying] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <section className="pm-hero">
+      <div className="pm-hero-ornaments" aria-hidden>
+        <div className="pm-blob pm-blob-1" data-parallax="0.15" />
+        <div className="pm-blob pm-blob-2" data-parallax="0.25" />
+        <div className="pm-grid-bg" />
+      </div>
+
+      <div className="pm-container pm-hero-inner">
+        <div className="pm-eyebrow" data-reveal>
+          <span className="pm-dot" /> Smart expense management, reimagined
+        </div>
+
+        <h1 className="pm-hero-title">
+          <span className="pm-h1-line" data-split>Stop chasing people</span>
+          <span className="pm-h1-line pm-h1-italic-row">
+            <span data-split>for money.</span>
+            <button
+              className={`pm-video-inline ${expanded ? "is-expanded" : ""}`}
+              onClick={() => setExpanded((v) => !v)}
+              data-cursor-text={expanded ? "close" : "watch"}
+              aria-label="Product preview"
+            >
+              <MiniAppPreview />
+              <span className="pm-video-play">
+                {playing ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
+              </span>
+            </button>
+            <span data-split>Start</span>
+          </span>
+          <span className="pm-h1-line pm-h1-italic" data-split>settling.</span>
+        </h1>
+
+        <p className="pm-hero-sub" data-reveal>
+          PayMint Verse tracks group expenses, splits bills four ways, simplifies debts to the
+          fewest transactions possible, and settles in one tap. No spreadsheets. No IOUs. No
+          awkward group chats.
+        </p>
+
+        <div className="pm-hero-cta" data-reveal>
+          <a href="#cta" className="pm-btn-primary" data-cursor-text="create group">
+            <span>Create your group</span>
+            <ArrowRight size={17} />
+          </a>
+          <button
+            className="pm-btn-ghost"
+            onClick={() => setPlaying((v) => !v)}
+            data-cursor-text={playing ? "pause" : "play demo"}
+          >
+            <span className="pm-play-ico">{playing ? <Pause size={13} /> : <Play size={13} fill="currentColor" />}</span>
+            <span>Watch 45s demo</span>
+          </button>
+        </div>
+
+        <div className="pm-hero-mockup" data-reveal>
+          <HeroAppMockup />
         </div>
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  FEATURES — editorial alternating rows, not a bento grid            */
-/* ------------------------------------------------------------------ */
-const balanceData = [
-  { m: 'Mon', v: 12 }, { m: 'Tue', v: 18 }, { m: 'Wed', v: 14 },
-  { m: 'Thu', v: 26 }, { m: 'Fri', v: 21 }, { m: 'Sat', v: 34 }, { m: 'Sun', v: 29 },
-];
-
-function FeatureRow({
-  icon: Icon,
-  title,
-  desc,
-  chips,
-  visual,
-  reverse,
-}: {
-  icon: any;
-  title: string;
-  desc: string;
-  chips?: string[];
-  visual: React.ReactNode;
-  reverse?: boolean;
-}) {
-  const ref = useRevealGroup('.frow', { stagger: 0.12 });
-
+function MiniAppPreview() {
   return (
-    <div
-      ref={ref}
-      className={`grid md:grid-cols-2 gap-12 items-center py-16 border-b border-slate-200 last:border-b-0 ${
-        reverse ? 'md:[&>*:first-child]:order-2' : ''
-      }`}
-    >
-      <div className="frow">
-        <div className="w-11 h-11 rounded-xl bg-[#ECFDF5] flex items-center justify-center mb-5">
-          <Icon className="w-5 h-5 text-[#059669]" />
-        </div>
-        <h3 className="text-[24px] font-bold text-[#0F172A] mb-3 tracking-tight">{title}</h3>
-        <p className="text-[15.5px] text-slate-500 leading-relaxed max-w-md mb-5">{desc}</p>
-        {chips && (
-          <div className="flex flex-wrap gap-2">
-            {chips.map((c) => (
-              <span key={c} className="text-[12.5px] font-medium bg-[#F8FAFC] border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg">
-                {c}
-              </span>
-            ))}
-          </div>
-        )}
+    <div className="pm-mini-preview">
+      <div className="pm-mini-row">
+        <div className="pm-mini-avatar" style={{ background: EMERALD.primary }}>M</div>
+        <div className="pm-mini-bar" />
+        <div className="pm-mini-amt">$42</div>
       </div>
-      <div className="frow" data-cursor-text="Preview">{visual}</div>
+      <div className="pm-mini-row">
+        <div className="pm-mini-avatar" style={{ background: EMERALD.mint }}>A</div>
+        <div className="pm-mini-bar" style={{ width: "60%" }} />
+        <div className="pm-mini-amt">$28</div>
+      </div>
     </div>
   );
 }
 
-function Features() {
+function HeroAppMockup() {
   return (
-    <section id="features" className="py-8 px-6 lg:px-8 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-4 pt-16">
-          <p className="text-[13.5px] font-semibold text-[#059669] uppercase tracking-wide mb-3">
-            Everything in one place
-          </p>
-          <h2 className="text-[34px] sm:text-[42px] font-bold text-[#0F172A] tracking-tight leading-tight">
-            Built for how groups actually spend money
-          </h2>
-        </div>
-
-        <FeatureRow
-          icon={Wallet}
-          title="Smart expense tracking"
-          desc="Log title, amount, category, and who paid in seconds. Four ways to split, every time the math checks out — down to the last rupee."
-          chips={['Equal', 'Custom amount', 'Percentage', 'Shares']}
-          visual={
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-6">
-              <p className="text-[12.5px] text-slate-400 mb-4">New expense</p>
-              <div className="space-y-3">
-                <div className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-[14px] text-slate-500">Dinner at Kolachi</div>
-                <div className="flex gap-3">
-                  <div className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-[14px] text-slate-500 flex-1">Rs 4,800</div>
-                  <div className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-[14px] text-slate-500 flex-1">Food</div>
-                </div>
-                <div className="flex gap-2">
-                  {['Equal', 'Custom', '%'].map((s, i) => (
-                    <span key={s} className={`text-[12.5px] px-3 py-1.5 rounded-lg font-medium ${i === 0 ? 'bg-[#059669] text-white' : 'bg-white border border-slate-200 text-slate-500'}`}>{s}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          }
-        />
-
-        <FeatureRow
-          reverse
-          icon={PieChartIcon}
-          title="Real-time balances"
-          desc="For every member, the app continuously calculates total paid, total owed, and current balance — so nobody has to ask."
-          visual={
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-6">
-              <p className="text-[12.5px] text-slate-400 mb-1">This week</p>
-              <p className="text-[22px] font-bold text-[#0F172A] mb-4">Balance trend</p>
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={balanceData}>
-                    <Line type="monotone" dataKey="v" stroke="#059669" strokeWidth={2.5} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          }
-        />
-
-        <FeatureRow
-          icon={ArrowRight}
-          title="Debt simplification"
-          desc="Instead of Ali paying Ahmed who pays Umar, PayMint Verse collapses the chain into Ali → Umar directly. Fewer transfers, same result."
-          visual={
-            <div className="bg-[#0F172A] rounded-2xl p-8 flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-[13.5px] text-slate-500 line-through">
-                <span>Ali</span><ArrowRight className="w-3.5 h-3.5" /><span>Ahmed</span><ArrowRight className="w-3.5 h-3.5" /><span>Umar</span>
-              </div>
-              <div className="flex items-center gap-2 bg-[#10B981]/10 border border-[#10B981]/25 rounded-lg px-4 py-3 w-fit">
-                <span className="font-semibold text-[14px] text-white">Ali</span>
-                <ArrowRight className="w-4 h-4 text-[#34D399]" />
-                <span className="font-semibold text-[14px] text-white">Umar</span>
-              </div>
-            </div>
-          }
-        />
-
-        <FeatureRow
-          reverse
-          icon={Landmark}
-          title="Settle your way"
-          desc="Cash, bank transfer, EasyPaisa, or JazzCash — recorded the instant it happens, updating every balance in the group automatically."
-          visual={
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-6 grid grid-cols-2 gap-3">
-              {['Cash', 'Bank transfer', 'EasyPaisa', 'JazzCash'].map((m) => (
-                <div key={m} className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-[13.5px] font-medium text-[#0F172A] flex items-center gap-2">
-                  <Landmark className="w-4 h-4 text-[#059669]" />
-                  {m}
-                </div>
-              ))}
-            </div>
-          }
-        />
+    <div className="pm-mockup">
+      <div className="pm-mockup-topbar">
+        <div className="pm-mockup-dots"><i /><i /><i /></div>
+        <div className="pm-mockup-url">paymint.verse / weekend-in-lisbon</div>
       </div>
-
-      <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6 pt-16">
-        {[
-          { icon: Users, title: 'Group roles', desc: 'Owner, Admin, Moderator, Member — invite by email.' },
-          { icon: History, title: 'Activity timeline', desc: 'Every action recorded — nothing happens quietly.' },
-          { icon: Split, title: 'Insights & export', desc: 'Spending by category, monthly trends, CSV export.' },
-        ].map((f) => (
-          <div key={f.title} className="border border-slate-200 rounded-2xl p-6">
-            <f.icon className="w-5 h-5 text-[#059669] mb-4" />
-            <h3 className="text-[16px] font-semibold text-[#0F172A] mb-1.5">{f.title}</h3>
-            <p className="text-[13.5px] text-slate-500">{f.desc}</p>
+      <div className="pm-mockup-body">
+        <aside className="pm-mockup-side">
+          <div className="pm-mock-group active">
+            <Plane size={15} /> Weekend in Lisbon
           </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  HOW IT WORKS — legitimate numbered sequence + scroll line-draw     */
-/* ------------------------------------------------------------------ */
-function HowItWorks() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!wrapRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.hiw-line',
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 1.2,
-          ease: 'power2.inOut',
-          transformOrigin: 'left center',
-          scrollTrigger: { trigger: wrapRef.current, start: 'top 70%' },
-        }
-      );
-      gsap.fromTo(
-        '.hiw-step',
-        { y: 28, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: wrapRef.current, start: 'top 70%' },
-        }
-      );
-    }, wrapRef);
-    return () => ctx.revert();
-  }, []);
-
-  const steps = [
-    { title: 'Create a group', desc: 'Northern Trip, Apartment Expenses, Office Team — invite by email in seconds.' },
-    { title: 'Add an expense', desc: 'Title, amount, category, who paid. Split equally, by percentage, shares, or a custom amount.' },
-    { title: 'Balances update instantly', desc: 'Everyone sees who owes what — simplified into the fewest payments automatically.' },
-    { title: 'Settle up', desc: 'Cash, bank transfer, EasyPaisa, or JazzCash. One tap, and the balance clears for everyone.' },
-  ];
-
-  return (
-    <section id="how-it-works" ref={wrapRef} className="py-28 px-6 lg:px-8 bg-[#F8FAFC]">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-16">
-          <p className="text-[13.5px] font-semibold text-[#059669] uppercase tracking-wide mb-3">How it works</p>
-          <h2 className="text-[34px] sm:text-[42px] font-bold text-[#0F172A] tracking-tight leading-tight">
-            From first expense to fully settled
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-4 gap-8 relative">
-          <div className="hiw-line hidden md:block absolute top-6 left-[12.5%] right-[12.5%] h-px bg-[#059669]" />
-          {steps.map((step, i) => (
-            <div key={step.title} className="hiw-step relative">
-              <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-[15px] mb-5 relative z-10"
-                style={{ background: 'linear-gradient(135deg,#059669,#34D399)' }}
-              >
-                {i + 1}
-              </div>
-              <h3 className="text-[16.5px] font-semibold text-[#0F172A] mb-2">{step.title}</h3>
-              <p className="text-[14px] text-slate-500 leading-relaxed">{step.desc}</p>
+          <div className="pm-mock-group"><HomeIcon size={15} /> Apartment 4B</div>
+          <div className="pm-mock-group"><Users size={15} /> Studio team</div>
+          <div className="pm-mock-group"><Utensils size={15} /> Supper club</div>
+          <button className="pm-mock-new"><Plus size={14} /> New group</button>
+        </aside>
+        <main className="pm-mockup-main">
+          <div className="pm-mock-head">
+            <div>
+              <h4>Weekend in Lisbon</h4>
+              <p>4 people · 12 expenses</p>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  ANALYTICS — dark slab, scroll-scale reveal                         */
-/* ------------------------------------------------------------------ */
-const categoryData = [
-  { name: 'Food', v: 32 }, { name: 'Transport', v: 18 }, { name: 'Stay', v: 24 },
-  { name: 'Fun', v: 14 }, { name: 'Other', v: 9 },
-];
-
-function AnalyticsShowcase() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        cardRef.current,
-        { scale: 0.92, opacity: 0 },
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: wrapRef.current, start: 'top 70%' },
-        }
-      );
-    }, wrapRef);
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <section ref={wrapRef} className="py-28 px-6 lg:px-8 bg-[#0F172A] relative overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.12] blur-3xl"
-        style={{ background: 'radial-gradient(circle,#34D399,transparent 70%)' }}
-      />
-      <div className="max-w-6xl mx-auto relative grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <p className="text-[13.5px] font-semibold text-[#6EE7B7] uppercase tracking-wide mb-3">Analytics</p>
-          <h2 className="text-[34px] sm:text-[42px] font-bold text-white tracking-tight leading-tight mb-5">
-            See where the money actually goes
-          </h2>
-          <p className="text-[16px] text-slate-400 leading-relaxed max-w-md">
-            Spending by category, monthly trends, and a full export to CSV
-            whenever you need the raw numbers. No spreadsheets required.
-          </p>
-        </div>
-
-        <div ref={cardRef} className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-          <p className="text-[12.5px] font-medium text-slate-500 mb-1">Northern Trip · This month</p>
-          <p className="text-[22px] font-bold text-white mb-5">Spending by category</p>
-          <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData}>
-                <XAxis dataKey="name" stroke="#64748B" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  contentStyle={{ background: '#1E293B', border: '1px solid #334155', borderRadius: 8, fontSize: 12, color: '#F8FAFC' }}
-                />
-                <Bar dataKey="v" fill="#34D399" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="pm-mock-balance">
+              <span>You are owed</span>
+              <strong>$127.40</strong>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  TESTIMONIALS                                                       */
-/* ------------------------------------------------------------------ */
-function Testimonials() {
-  const ref = useRevealGroup('.tst-card', { stagger: 0.12 });
-
-  const quotes = [
-    { quote: 'We used to argue about who paid for gas. Now the app just tells us.', name: 'Hina R.', tag: 'Trip group · 6 people' },
-    { quote: 'Rent, utilities, groceries — settling up went from a monthly headache to a two-minute task.', name: 'Bilal K.', tag: 'Roommates · 3 people' },
-    { quote: 'Our team expenses used to live in three chats. Now one record everyone trusts.', name: 'Ayesha M.', tag: 'Small team · 8 people' },
-  ];
-
-  return (
-    <section className="py-28 px-6 lg:px-8 bg-white">
-      <div className="max-w-6xl mx-auto" ref={ref}>
-        <div className="max-w-2xl mb-14">
-          <p className="text-[13.5px] font-semibold text-[#059669] uppercase tracking-wide mb-3">Built for real groups</p>
-          <h2 className="text-[34px] sm:text-[42px] font-bold text-[#0F172A] tracking-tight leading-tight">
-            Whoever you split expenses with
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {quotes.map((q) => (
-            <div key={q.name} className="tst-card bg-[#F8FAFC] border border-slate-200 rounded-2xl p-7">
-              <p className="text-[14.5px] text-slate-600 leading-relaxed mb-6">&ldquo;{q.quote}&rdquo;</p>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-semibold"
-                  style={{ background: 'linear-gradient(135deg,#059669,#34D399)' }}
-                >
-                  {q.name[0]}
+          <div className="pm-mock-list">
+            {[
+              { icon: <HomeIcon size={14} />, t: "Airbnb — 3 nights", who: "Maya paid", amt: "$420.00" },
+              { icon: <Utensils size={14} />, t: "Time Out Market dinner", who: "You paid", amt: "$86.50" },
+              { icon: <Plane size={14} />, t: "Uber to airport", who: "Jonas paid", amt: "$34.20" },
+              { icon: <Sparkles size={14} />, t: "Fado night tickets", who: "You paid", amt: "$72.00" },
+            ].map((e, i) => (
+              <div key={i} className="pm-mock-item">
+                <span className="pm-mock-ico">{e.icon}</span>
+                <div className="pm-mock-txt">
+                  <strong>{e.t}</strong>
+                  <em>{e.who}</em>
                 </div>
-                <div>
-                  <p className="text-[13.5px] font-semibold text-[#0F172A]">{q.name}</p>
-                  <p className="text-[12.5px] text-slate-400">{q.tag}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  SECURITY                                                            */
-/* ------------------------------------------------------------------ */
-function Security() {
-  const ref = useRevealGroup('.sec-item', { stagger: 0.1 });
-
-  const points = [
-    { icon: Lock, title: 'Encrypted by default', desc: 'Your data is protected end-to-end, at rest and in transit.' },
-    { icon: KeyRound, title: 'Secure sign-in', desc: 'Email & password or Google — with server-side session handling.' },
-    { icon: ServerCog, title: 'Protected access', desc: 'Every route and record is scoped to people you actually invited.' },
-  ];
-
-  return (
-    <section id="security" className="py-28 px-6 lg:px-8 bg-[#F8FAFC]">
-      <div className="max-w-6xl mx-auto" ref={ref}>
-        <div className="max-w-2xl mb-14">
-          <p className="text-[13.5px] font-semibold text-[#059669] uppercase tracking-wide mb-3">Security</p>
-          <h2 className="text-[34px] sm:text-[42px] font-bold text-[#0F172A] tracking-tight leading-tight">
-            Your group&apos;s money, kept private
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {points.map((p) => (
-            <div key={p.title} className="sec-item flex gap-4">
-              <div className="w-11 h-11 shrink-0 rounded-xl bg-white border border-slate-200 flex items-center justify-center">
-                <p.icon className="w-5 h-5 text-[#059669]" />
-              </div>
-              <div>
-                <h3 className="text-[16px] font-semibold text-[#0F172A] mb-1.5">{p.title}</h3>
-                <p className="text-[14px] text-slate-500 leading-relaxed">{p.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  FINAL CTA — magnetic button                                        */
-/* ------------------------------------------------------------------ */
-function FinalCTA() {
-  const ref = useRevealGroup('.cta-item');
-
-  return (
-    <section className="px-6 lg:px-8 py-10 bg-white">
-      <div
-        ref={ref}
-        className="max-w-6xl mx-auto rounded-3xl px-8 py-16 sm:py-20 text-center relative overflow-hidden"
-        style={{ background: 'linear-gradient(120deg,#059669,#10B981)' }}
-      >
-        <div aria-hidden className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full bg-white/10 blur-2xl" />
-        <h2 className="cta-item text-[32px] sm:text-[42px] font-bold text-white tracking-tight max-w-2xl mx-auto leading-tight">
-          Stop chasing people for money they already owe you.
-        </h2>
-        <p className="cta-item text-[16px] text-emerald-50/90 mt-4 max-w-md mx-auto">
-          Create your first group free — no card required.
-        </p>
-        <MagneticLink
-          href="/auth/signup"
-          data-cursor-text="Go"
-          className="cta-item inline-flex items-center gap-2 bg-white text-[#059669] font-semibold text-[15px] px-7 py-3.5 rounded-full mt-8"
-        >
-          Get started for free
-          <ArrowRight className="w-4 h-4" />
-        </MagneticLink>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  FOOTER                                                              */
-/* ------------------------------------------------------------------ */
-function Footer() {
-  const columns = [
-    { title: 'Product', links: ['Features', 'How it works', 'Security', 'Pricing'] },
-    { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
-    { title: 'Legal', links: ['Privacy policy', 'Terms of service'] },
-  ];
-
-  return (
-    <footer className="px-6 lg:px-8 py-16 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 mb-12">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Image src="/green logo.png" alt="PayMint Verse" width={28} height={28} className="rounded-lg" />
-              <span className="font-semibold text-[#0F172A] text-[16px]">PayMint Verse</span>
-            </div>
-            <p className="text-[14px] text-slate-500 max-w-xs leading-relaxed">
-              Transparent, automated expense splitting for trips, roommates, families, and teams.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-8">
-            {columns.map((col) => (
-              <div key={col.title}>
-                <p className="text-[13px] font-semibold text-[#0F172A] mb-3">{col.title}</p>
-                <ul className="space-y-2.5">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-[13.5px] text-slate-500 hover:text-[#059669] transition-colors">{link}</a>
-                    </li>
-                  ))}
-                </ul>
+                <span className="pm-mock-amt">{e.amt}</span>
               </div>
             ))}
           </div>
+          <div className="pm-mock-settle">
+            <div>
+              <em>Simplified settlement</em>
+              <strong>Jonas → You · $92.20</strong>
+            </div>
+            <button className="pm-mock-btn" data-cursor-text="settle">Settle up <ArrowRight size={13} /></button>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function TrustStrip() {
+  const items = [
+    "10k+ groups tracked",
+    "$50M+ split fairly",
+    "4.9★ user rating",
+    "0 spreadsheets required",
+    "Bank-level security",
+  ];
+  return (
+    <section className="pm-trust" data-reveal>
+      <p className="pm-trust-title">
+        Trusted by roommates, weekend crews, wedding parties, and remote teams in 40+ countries.
+      </p>
+      <div className="pm-trust-track">
+        <div className="pm-trust-inner">
+          {[...items, ...items].map((t, i) => (
+            <span key={i} className="pm-trust-item">
+              <span className="pm-trust-star">✦</span> {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProblemSolution() {
+  return (
+    <section className="pm-ps" id="how">
+      <div className="pm-container">
+        <div className="pm-ps-eyebrow" data-reveal>
+          <em>Why PayMint Verse</em>
+        </div>
+        <h2 className="pm-ps-title" data-split>
+          Group money is messy. We built the calm layer on top.
+        </h2>
+
+        <div className="pm-ps-grid" data-stagger>
+          <article className="pm-ps-card pm-ps-problem" data-stagger-item>
+            <span className="pm-ps-label">The problem</span>
+            <ul>
+              <li><span>1</span> Someone always pays, no one remembers who.</li>
+              <li><span>2</span> Splitting equally is unfair; splitting by shares is math.</li>
+              <li><span>3</span> Debts pile up in circles — A owes B owes C owes A.</li>
+              <li><span>4</span> The reminder chat gets muted after week two.</li>
+            </ul>
+          </article>
+          <article className="pm-ps-card pm-ps-solution" data-stagger-item>
+            <span className="pm-ps-label">The PayMint way</span>
+            <ul>
+              <li><Check size={16} /> Log an expense in three seconds, from anywhere.</li>
+              <li><Check size={16} /> Split evenly, by share, by percentage, or exact amount.</li>
+              <li><Check size={16} /> Our engine collapses circular debts into the fewest transfers.</li>
+              <li><Check size={16} /> One-tap settlement, receipt in your inbox, done.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturesDeepDive() {
+  const features = [
+    {
+      icon: <Receipt />,
+      title: "Log in seconds",
+      body: "Snap a receipt, pick a group, tag participants. We handle the rest.",
+      tag: "Capture",
+    },
+    {
+      icon: <Scale />,
+      title: "Four ways to split",
+      body: "Equal, unequal, percentage, or exact. Change your mind anytime.",
+      tag: "Fair",
+    },
+    {
+      icon: <Zap />,
+      title: "Debt simplification",
+      body: "Our graph engine reduces a mess of IOUs to the minimum number of transfers.",
+      tag: "Smart",
+    },
+    {
+      icon: <BarChart3 />,
+      title: "Real-time analytics",
+      body: "See spend by category, person, and month. Understand where money goes.",
+      tag: "Insight",
+    },
+    {
+      icon: <Wallet />,
+      title: "One-tap settlement",
+      body: "Settle inside the app or export to your payment method of choice.",
+      tag: "Close",
+    },
+    {
+      icon: <ShieldCheck />,
+      title: "Private by design",
+      body: "Row-level security. Your group stays your group. Nothing is sold, ever.",
+      tag: "Safe",
+    },
+  ];
+  return (
+    <section className="pm-features" id="features">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Features</span>
+          <h2 className="pm-sec-title" data-split>
+            A complete toolkit for shared money, without the friction.
+          </h2>
+          <p className="pm-sec-sub" data-reveal>
+            Every feature earns its place. Nothing you have to configure, nothing you have to
+            learn, nothing you have to babysit.
+          </p>
         </div>
 
-        <div className="border-t border-slate-200 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-[13px] text-slate-400">© {new Date().getFullYear()} PayMint Verse. All rights reserved.</p>
-          <div className="flex items-center gap-1.5 text-[12.5px] text-slate-400">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
-            Bank-level encryption
+        <div className="pm-feat-grid" data-stagger>
+          {features.map((f, i) => (
+            <article key={i} className="pm-feat-card" data-stagger-item data-cursor-text="explore">
+              <div className="pm-feat-icon">{f.icon}</div>
+              <span className="pm-feat-tag">{f.tag}</span>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+              <span className="pm-feat-arrow"><ArrowUpRight size={16} /></span>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SplitDemo() {
+  const methods = ["Equally", "By share", "By %", "Exact"] as const;
+  const [method, setMethod] = useState<(typeof methods)[number]>("Equally");
+  const people = [
+    { name: "You", color: EMERALD.primary },
+    { name: "Maya", color: EMERALD.mint },
+    { name: "Jonas", color: "#0f766e" },
+    { name: "Ari", color: EMERALD.light },
+  ];
+  const total = 240;
+  const values: Record<(typeof methods)[number], number[]> = {
+    Equally: [60, 60, 60, 60],
+    "By share": [96, 72, 48, 24],
+    "By %": [90, 60, 60, 30],
+    Exact: [110, 40, 55, 35],
+  };
+
+  return (
+    <section className="pm-split">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Splits</span>
+          <h2 className="pm-sec-title" data-split>
+            Four ways to split. Zero arguments.
+          </h2>
+        </div>
+
+        <div className="pm-split-panel" data-reveal>
+          <div className="pm-split-tabs">
+            {methods.map((m) => (
+              <button
+                key={m}
+                onClick={() => setMethod(m)}
+                className={`pm-split-tab ${method === m ? "is-active" : ""}`}
+                data-cursor-text={m.toLowerCase()}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+          <div className="pm-split-body">
+            <div className="pm-split-head">
+              <div>
+                <em>Dinner at Cantina</em>
+                <strong>${total.toFixed(2)}</strong>
+              </div>
+              <div className="pm-split-meta">Method · <span>{method}</span></div>
+            </div>
+            <div className="pm-split-list">
+              {people.map((p, i) => {
+                const v = values[method][i];
+                const pct = (v / total) * 100;
+                return (
+                  <div key={p.name} className="pm-split-row">
+                    <span className="pm-split-avatar" style={{ background: p.color }}>
+                      {p.name[0]}
+                    </span>
+                    <span className="pm-split-name">{p.name}</span>
+                    <div className="pm-split-bar">
+                      <div
+                        className="pm-split-fill"
+                        style={{ width: `${pct}%`, background: p.color }}
+                      />
+                    </div>
+                    <span className="pm-split-amt">${v.toFixed(2)}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function StatsSection() {
+  const stats = [
+    { n: "500K+", t: "Expenses tracked", d: "Across weekend trips, apartments, and remote teams." },
+    { n: "4.9", t: "User satisfaction", d: "Averaged across the App Store and Play Store." },
+    { n: "42%", t: "Fewer transfers", d: "Median reduction after debt simplification runs." },
+    { n: "1-tap", t: "To settle up", d: "Whether it is $6 or $600, closing out takes seconds." },
+  ];
+  return (
+    <section className="pm-stats">
+      <div className="pm-container">
+        <div className="pm-stats-head">
+          <span className="pm-sec-kicker pm-sec-kicker-light" data-reveal>By the numbers</span>
+          <h2 className="pm-stats-title" data-split>
+            Numbers that matter, from people who stopped arguing about money.
+          </h2>
+        </div>
+        <div className="pm-stats-grid" data-stagger>
+          {stats.map((s) => (
+            <div key={s.t} className="pm-stat" data-stagger-item>
+              <div className="pm-stat-n">{s.n}</div>
+              <div className="pm-stat-t">{s.t}</div>
+              <div className="pm-stat-d">{s.d}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SimplifySection() {
+  const before = [
+    { from: "Ali", to: "Ahmed", amt: "PKR 1,200" },
+    { from: "Ahmed", to: "Umar", amt: "PKR 1,200" },
+    { from: "Sara", to: "Ali", amt: "PKR 800" },
+    { from: "Umar", to: "Sara", amt: "PKR 400" },
+  ];
+  const after = [
+    { from: "Ali", to: "Umar", amt: "PKR 800" },
+    { from: "Sara", to: "Umar", amt: "PKR 400" },
+  ];
+  return (
+    <section className="pm-simplify" id="simplify">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Debt simplification</span>
+          <h2 className="pm-sec-title" data-split>
+            From tangled chains to the <em>fewest possible payments.</em>
+          </h2>
+          <p className="pm-sec-sub" data-reveal>
+            PayMint Verse runs a greedy algorithm across every net balance to collapse circular
+            debts. Ali → Ahmed → Umar becomes just Ali → Umar. Less friction, faster settlements,
+            fewer awkward reminders.
+          </p>
+        </div>
+
+        <div className="pm-simp-stats" data-stagger>
+          <div className="pm-simp-stat" data-stagger-item><strong>–68%</strong><span>Fewer transactions</span></div>
+          <div className="pm-simp-stat" data-stagger-item><strong>1 tap</strong><span>To settle up</span></div>
+          <div className="pm-simp-stat" data-stagger-item><strong>Instant</strong><span>Balance updates</span></div>
+        </div>
+
+        <div className="pm-simp-grid" data-stagger>
+          <div className="pm-simp-card" data-stagger-item>
+            <header><span className="pm-simp-pill">Before</span><strong>4 payments</strong></header>
+            <ul>
+              {before.map((p, i) => (
+                <li key={i}><span>{p.from}</span><ArrowRight size={13} /><span>{p.to}</span><em>{p.amt}</em></li>
+              ))}
+            </ul>
+          </div>
+          <div className="pm-simp-card pm-simp-card-after" data-stagger-item>
+            <header><span className="pm-simp-pill pm-simp-pill-good">After</span><strong>2 payments</strong></header>
+            <ul>
+              {after.map((p, i) => (
+                <li key={i}><span>{p.from}</span><ArrowRight size={13} /><span>{p.to}</span><em>{p.amt}</em></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AnalyticsSection() {
+  const cats = [
+    { t: "Food", p: 32, c: "#059669" },
+    { t: "Transport", p: 24, c: "#10B981" },
+    { t: "Stay", p: 18, c: "#34D399" },
+    { t: "Entertainment", p: 12, c: "#6EE7B7" },
+    { t: "Shopping", p: 8, c: "#a7f3d0" },
+    { t: "Utilities", p: 4, c: "#062e23" },
+    { t: "Other", p: 2, c: "#94a3b8" },
+  ];
+  const R = 70, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <section className="pm-analytics" id="analytics">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Analytics</span>
+          <h2 className="pm-sec-title" data-split>
+            The clearest picture of <em>where money actually goes.</em>
+          </h2>
+          <p className="pm-sec-sub" data-reveal>
+            Category breakdowns, monthly trends, per-person averages. Export any group to CSV in
+            one click for your own records or a shared accountant.
+          </p>
+        </div>
+
+        <div className="pm-anal-grid" data-stagger>
+          <div className="pm-anal-card pm-anal-donut" data-stagger-item>
+            <header>
+              <div><em>October</em><strong>Spending by category</strong></div>
+              <button className="pm-anal-export">Export CSV</button>
+            </header>
+            <div className="pm-donut-wrap">
+              <svg viewBox="0 0 200 200" className="pm-donut">
+                <circle cx="100" cy="100" r={R} fill="none" stroke="rgba(6,46,35,0.06)" strokeWidth="22" />
+                {cats.map((c) => {
+                  const len = (c.p / 100) * C;
+                  const dash = `${len} ${C - len}`;
+                  const offset = -acc;
+                  acc += len;
+                  return (
+                    <circle key={c.t} cx="100" cy="100" r={R} fill="none" stroke={c.c}
+                      strokeWidth="22" strokeDasharray={dash} strokeDashoffset={offset}
+                      transform="rotate(-90 100 100)" strokeLinecap="butt" />
+                  );
+                })}
+                <text x="100" y="94" textAnchor="middle" className="pm-donut-lbl">Total</text>
+                <text x="100" y="118" textAnchor="middle" className="pm-donut-val">PKR 68.4K</text>
+              </svg>
+              <ul className="pm-anal-legend">
+                {cats.map((c) => (
+                  <li key={c.t}><i style={{ background: c.c }} /><span>{c.t}</span><em>{c.p}%</em></li>
+                ))}
+              </ul>
+            </div>
+            <footer>
+              <div><span>Total</span><strong>PKR 68,420</strong></div>
+              <div><span>Avg / person</span><strong>PKR 17,105</strong></div>
+              <div><span>Vs last month</span><strong className="pm-up">+12.4%</strong></div>
+            </footer>
+          </div>
+
+          <div className="pm-anal-card pm-anal-list" data-stagger-item>
+            <h4>What you unlock</h4>
+            <ul>
+              {[
+                "Live category donut & monthly trend charts",
+                "Per-member spend, owed and settled totals",
+                "Filter by group, date range or category",
+                "One-click CSV export for any date range",
+              ].map((t) => (
+                <li key={t}><Check size={16} /> {t}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { n: "01", t: "Create a group", d: "Trip, apartment, team — invite by link. No accounts required." },
+    { n: "02", t: "Log expenses", d: "Snap a receipt or type it in. Three seconds, done." },
+    { n: "03", t: "Choose a split", d: "Equal, exact, share, or percentage — per expense." },
+    { n: "04", t: "Settle up", d: "PayMint collapses the chain. One tap via EasyPaisa or JazzCash." },
+  ];
+  return (
+    <section className="pm-how">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>How it works</span>
+          <h2 className="pm-sec-title" data-split>
+            Four steps between <em>chaos and calm.</em>
+          </h2>
+        </div>
+        <ol className="pm-how-grid" data-stagger>
+          {steps.map((s) => (
+            <li key={s.n} className="pm-how-step" data-stagger-item>
+              <span className="pm-how-n">{s.n}</span>
+              <strong>{s.t}</strong>
+              <p>{s.d}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+function FinalCTA() {
+  return (
+    <section className="pm-cta" id="cta">
+      <div className="pm-container">
+        <div className="pm-cta-card">
+          <div className="pm-cta-orn" data-parallax="0.2" />
+          <span className="pm-cta-kick" data-reveal>Ready when you are</span>
+          <h2 className="pm-cta-title" data-split>
+            Start tracking shared expenses in the next 30 seconds.
+          </h2>
+          <p className="pm-cta-sub" data-reveal>
+            Free forever for personal groups. No credit card. Bring your friends, roommates, or
+            team along in one link.
+          </p>
+          <div className="pm-cta-actions" data-reveal>
+            <a href="#" className="pm-btn-primary pm-btn-primary-lg" data-cursor-text="launch app">
+              <span>Launch PayMint Verse</span>
+              <ArrowRight size={18} />
+            </a>
+            <a href="#features" className="pm-btn-ghost pm-btn-ghost-light" data-cursor-text="learn">
+              <span>See every feature</span>
+            </a>
+          </div>
+          <div className="pm-cta-chips" data-stagger>
+            <div className="pm-cta-chip" data-stagger-item>
+              <strong>Free forever</strong><span>For personal groups</span>
+            </div>
+            <div className="pm-cta-chip" data-stagger-item>
+              <strong>No card required</strong><span>Sign up in seconds</span>
+            </div>
+            <div className="pm-cta-chip" data-stagger-item>
+              <strong>Made in Pakistan</strong><span>EasyPaisa &amp; JazzCash built-in</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="pm-footer">
+      <div className="pm-container pm-footer-inner">
+        <div className="pm-footer-brand">
+          <LogoMark />
+          <span>PayMint<em>Verse</em></span>
+          <p>The calm layer on top of shared money.</p>
+        </div>
+        <div className="pm-footer-cols">
+          <div>
+            <h5>Product</h5>
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#pricing">Pricing</a>
+          </div>
+          <div>
+            <h5>Company</h5>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Careers</a>
+          </div>
+          <div>
+            <h5>Legal</h5>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Security</a>
+          </div>
+        </div>
+      </div>
+      <div className="pm-footer-base">
+        <span>© {new Date().getFullYear()} PayMint Verse</span>
+        <span>Built with intention in emerald.</span>
       </div>
     </footer>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  PAGE                                                                */
-/* ------------------------------------------------------------------ */
-export default function Homepage() {
-  useLenis();
-
+function StyleTag() {
   return (
-    <main className="min-h-screen antialiased [@media(pointer:fine)]:cursor-none [@media(pointer:fine)]:[&_a]:cursor-none [@media(pointer:fine)]:[&_button]:cursor-none">
-      <CustomCursor />
-      <Navbar />
-      <Hero />
-      <TrustMarquee />
-      <ProblemSolution />
-      <Features />
-      <HowItWorks />
-      <AnalyticsShowcase />
-      <Testimonials />
-      <Security />
-      <FinalCTA />
-      <Footer />
-    </main>
+    <style>{`
+      .pm-root {
+        --ink: ${EMERALD.ink};
+        --primary: ${EMERALD.primary};
+        --secondary: ${EMERALD.secondary};
+        --mint: ${EMERALD.mint};
+        --light: ${EMERALD.light};
+        --paper: ${EMERALD.paper};
+        --line: rgba(6,46,35,0.09);
+        font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        overflow-x: hidden;
+      }
+      .pm-root * { box-sizing: border-box; }
+      .pm-container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px); }
+
+      .pm-nav { position: fixed; top: 14px; left: 0; right: 0; z-index: 100;
+        transition: transform .5s cubic-bezier(.6,.05,.2,1), top .3s; }
+      .pm-nav.is-hidden { transform: translateY(-140%); }
+      .pm-nav.is-scrolled { top: 10px; }
+      .pm-nav-inner {
+        display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        max-width: 1180px; margin: 0 auto; padding: 10px 14px 10px 22px;
+        background: rgba(255,255,255,0.78); backdrop-filter: blur(18px) saturate(1.4);
+        border: 1px solid rgba(6,46,35,0.08); border-radius: 999px;
+        box-shadow: 0 10px 30px -18px rgba(6,46,35,0.25);
+      }
+      .pm-logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+      .pm-logo em { font-style: normal; font-weight: 400; color: var(--primary); }
+      .pm-nav-links { display: flex; align-items: center; gap: 6px; }
+      .pm-navlink { position: relative; padding: 8px 14px; font-size: 14px; color: var(--ink); text-decoration: none; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+      .pm-navlink > span { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 4px; }
+      .pm-navlink::before { content: ''; position: absolute; inset: 0; background: rgba(6,46,35,0.06); border-radius: 999px; transform: scale(.7); opacity: 0; transition: .3s cubic-bezier(.6,.05,.2,1); }
+      .pm-navlink:hover::before { transform: scale(1); opacity: 1; }
+      .pm-navlink-menu { padding-right: 12px; }
+      .pm-dropdown { position: absolute; top: calc(100% + 10px); left: 50%; transform: translate(-50%, -8px); background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 10px; width: 320px; opacity: 0; pointer-events: none; transition: .35s cubic-bezier(.6,.05,.2,1); box-shadow: 0 24px 50px -20px rgba(6,46,35,0.2); }
+      .pm-dropdown.is-open { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+      .pm-drop-item { display: flex; gap: 12px; padding: 10px 12px; border-radius: 14px; align-items: center; text-decoration: none; color: var(--ink); transition: background .25s; }
+      .pm-drop-item:hover { background: rgba(5,150,105,0.08); }
+      .pm-drop-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(5,150,105,0.1); color: var(--primary); display: grid; place-items: center; }
+      .pm-drop-item strong { display: block; font-size: 13.5px; font-weight: 600; }
+      .pm-drop-item em { display: block; font-style: normal; font-size: 12px; color: rgba(6,46,35,0.55); margin-top: 2px; }
+      .pm-cta-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px 10px 20px; background: var(--ink); color: var(--paper); border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 500; transition: transform .3s, background .3s; }
+      .pm-cta-btn:hover { transform: translateY(-1px); background: var(--primary); }
+      @media (max-width: 820px) { .pm-nav-links { display: none; } }
+
+      .pm-hero { position: relative; padding: 160px 0 80px; overflow: hidden; }
+      .pm-hero-ornaments { position: absolute; inset: 0; pointer-events: none; }
+      .pm-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(6,46,35,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(6,46,35,0.05) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at top, black, transparent 70%); }
+      .pm-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55; }
+      .pm-blob-1 { width: 520px; height: 520px; background: radial-gradient(circle, ${EMERALD.mint}, transparent 70%); top: -140px; right: -100px; }
+      .pm-blob-2 { width: 400px; height: 400px; background: radial-gradient(circle, ${EMERALD.light}, transparent 70%); top: 240px; left: -120px; opacity: 0.4; }
+      .pm-hero-inner { position: relative; }
+
+      .pm-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); border-radius: 999px; font-size: 12.5px; font-weight: 500; color: var(--ink); }
+      .pm-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--primary); box-shadow: 0 0 0 4px rgba(5,150,105,0.18); }
+
+      .pm-hero-title { margin: 22px 0 30px; font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; font-size: clamp(48px, 8vw, 108px); line-height: 0.98; letter-spacing: -0.03em; }
+      .pm-h1-line { display: block; }
+      .pm-h1-italic, .pm-h1-italic-row span[data-split]:last-child, .pm-h1-italic-row > span:last-child { font-style: italic; color: var(--primary); }
+      .pm-h1-italic-row { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+      .pm-word { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1; padding-bottom: 0.06em; }
+      .pm-word-inner { display: inline-block; }
+
+      .pm-video-inline { position: relative; display: inline-flex; width: clamp(130px, 15vw, 200px); height: clamp(52px, 6vw, 78px); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #fff; cursor: pointer; vertical-align: middle; transition: transform .5s cubic-bezier(.6,.05,.2,1), width .5s, height .5s; padding: 0; }
+      .pm-video-inline:hover { transform: translateY(-2px) rotate(-1deg); }
+      .pm-video-inline.is-expanded { width: clamp(230px, 22vw, 320px); height: clamp(88px, 9vw, 120px); }
+      .pm-video-play { position: absolute; bottom: 8px; right: 8px; width: 26px; height: 26px; background: var(--ink); color: var(--paper); border-radius: 999px; display: grid; place-items: center; }
+
+      .pm-mini-preview { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; height: 100%; justify-content: center; }
+      .pm-mini-row { display: flex; align-items: center; gap: 8px; }
+      .pm-mini-avatar { width: 22px; height: 22px; border-radius: 999px; color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; font-family: 'Inter'; }
+      .pm-mini-bar { flex: 1; height: 6px; border-radius: 999px; background: linear-gradient(90deg, ${EMERALD.primary}, ${EMERALD.mint}); width: 80%; }
+      .pm-mini-amt { font-family: 'Inter'; font-size: 11px; font-weight: 600; color: var(--ink); }
+
+      .pm-hero-sub { max-width: 640px; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.55; color: rgba(6,46,35,0.7); }
+      .pm-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+      .pm-btn-primary { display: inline-flex; align-items: center; gap: 10px; padding: 15px 22px 15px 26px; background: var(--ink); color: var(--paper); border-radius: 999px; font-size: 15px; font-weight: 500; text-decoration: none; transition: .3s cubic-bezier(.6,.05,.2,1); position: relative; overflow: hidden; }
+      .pm-btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, var(--primary), var(--mint)); opacity: 0; transition: .3s; }
+      .pm-btn-primary > * { position: relative; z-index: 1; }
+      .pm-btn-primary:hover::before { opacity: 1; }
+      .pm-btn-primary:hover { transform: translateY(-2px); }
+      .pm-btn-primary-lg { padding: 18px 26px 18px 30px; font-size: 16px; }
+
+      .pm-btn-ghost { display: inline-flex; align-items: center; gap: 10px; padding: 15px 20px; background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; transition: .3s; font-family: inherit; }
+      .pm-btn-ghost:hover { background: rgba(6,46,35,0.05); transform: translateY(-2px); }
+      .pm-play-ico { width: 24px; height: 24px; background: rgba(5,150,105,0.15); color: var(--primary); border-radius: 999px; display: grid; place-items: center; }
+      .pm-btn-ghost-light { color: var(--paper); border-color: rgba(255,255,255,0.24); }
+      .pm-btn-ghost-light:hover { background: rgba(255,255,255,0.08); }
+
+      .pm-hero-mockup { margin-top: 80px; border-radius: 26px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(6,46,35,0.32), 0 0 0 1px var(--line); background: #fff; }
+      .pm-mockup-topbar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: linear-gradient(180deg, #fff, #f4f7f4); border-bottom: 1px solid var(--line); }
+      .pm-mockup-dots { display: flex; gap: 6px; }
+      .pm-mockup-dots i { width: 10px; height: 10px; border-radius: 999px; background: var(--line); display: inline-block; }
+      .pm-mockup-dots i:nth-child(1) { background: #ff7369; } .pm-mockup-dots i:nth-child(2) { background: #ffbc42; } .pm-mockup-dots i:nth-child(3) { background: var(--mint); }
+      .pm-mockup-url { font-size: 12px; color: rgba(6,46,35,0.55); background: rgba(6,46,35,0.05); padding: 5px 12px; border-radius: 999px; margin: 0 auto; }
+      .pm-mockup-body { display: grid; grid-template-columns: 220px 1fr; min-height: 460px; }
+      .pm-mockup-side { padding: 20px 12px; border-right: 1px solid var(--line); background: #fbfcfb; display: flex; flex-direction: column; gap: 4px; }
+      .pm-mock-group { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; font-size: 13.5px; color: rgba(6,46,35,0.75); cursor: pointer; transition: background .2s; }
+      .pm-mock-group:hover { background: rgba(6,46,35,0.05); }
+      .pm-mock-group.active { background: var(--ink); color: var(--paper); }
+      .pm-mock-new { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px dashed rgba(6,46,35,0.2); background: transparent; border-radius: 12px; color: rgba(6,46,35,0.6); font-size: 13px; cursor: pointer; font-family: inherit; }
+      .pm-mockup-main { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+      .pm-mock-head { display: flex; justify-content: space-between; align-items: flex-start; }
+      .pm-mock-head h4 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+      .pm-mock-head p { margin: 0; font-size: 13px; color: rgba(6,46,35,0.55); }
+      .pm-mock-balance { text-align: right; }
+      .pm-mock-balance span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: rgba(6,46,35,0.5); }
+      .pm-mock-balance strong { display: block; font-size: 24px; font-weight: 600; color: var(--primary); margin-top: 2px; }
+      .pm-mock-list { display: flex; flex-direction: column; }
+      .pm-mock-item { display: flex; align-items: center; gap: 14px; padding: 14px 6px; border-bottom: 1px solid var(--line); }
+      .pm-mock-item:last-child { border-bottom: none; }
+      .pm-mock-ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(5,150,105,0.1); color: var(--primary); display: grid; place-items: center; }
+      .pm-mock-txt { flex: 1; }
+      .pm-mock-txt strong { display: block; font-size: 14px; font-weight: 500; }
+      .pm-mock-txt em { display: block; font-style: normal; font-size: 12px; color: rgba(6,46,35,0.5); margin-top: 2px; }
+      .pm-mock-amt { font-size: 14px; font-weight: 600; }
+      .pm-mock-settle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: linear-gradient(120deg, rgba(5,150,105,0.08), rgba(52,211,153,0.08)); border-radius: 16px; border: 1px solid rgba(5,150,105,0.15); }
+      .pm-mock-settle em { display: block; font-style: normal; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: rgba(6,46,35,0.55); }
+      .pm-mock-settle strong { display: block; margin-top: 2px; font-size: 15px; font-weight: 600; }
+      .pm-mock-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: var(--ink); color: var(--paper); border: none; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: transform .3s, background .3s; }
+      .pm-mock-btn:hover { transform: translateY(-1px); background: var(--primary); }
+      @media (max-width: 720px) { .pm-mockup-body { grid-template-columns: 1fr; } .pm-mockup-side { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); } .pm-mock-new { display: none; } }
+
+      .pm-trust { padding: 60px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; overflow: hidden; }
+      .pm-trust-title { max-width: 900px; margin: 0 auto 30px; padding: 0 20px; text-align: center; font-size: clamp(16px, 1.4vw, 19px); color: rgba(6,46,35,0.65); line-height: 1.5; }
+      .pm-trust-track { overflow: hidden; }
+      .pm-trust-inner { display: flex; gap: 60px; animation: pm-marq2 30s linear infinite; width: max-content; }
+      @keyframes pm-marq2 { to { transform: translateX(-50%); } }
+      .pm-trust-item { display: inline-flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+      .pm-trust-star { color: var(--primary); }
+
+      .pm-ps { padding: 140px 0; }
+      .pm-ps-eyebrow em { font-style: italic; font-family: 'Instrument Serif', serif; font-size: 18px; color: var(--primary); }
+      .pm-ps-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; margin: 12px 0 60px; max-width: 900px; }
+      .pm-ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .pm-ps-card { padding: 40px; border-radius: 28px; border: 1px solid var(--line); background: #fff; }
+      .pm-ps-problem { background: #fff; }
+      .pm-ps-solution { background: var(--ink); color: var(--paper); border-color: transparent; }
+      .pm-ps-label { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 22px; background: rgba(6,46,35,0.06); color: var(--ink); }
+      .pm-ps-solution .pm-ps-label { background: rgba(52,211,153,0.16); color: var(--mint); }
+      .pm-ps-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
+      .pm-ps-card li { display: flex; gap: 14px; align-items: flex-start; font-size: 16px; line-height: 1.5; }
+      .pm-ps-problem li span { flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; background: rgba(6,46,35,0.06); color: rgba(6,46,35,0.6); font-size: 12px; font-weight: 600; display: grid; place-items: center; margin-top: 2px; }
+      .pm-ps-solution li svg { color: var(--mint); flex-shrink: 0; margin-top: 4px; }
+      @media (max-width: 780px) { .pm-ps-grid { grid-template-columns: 1fr; } .pm-ps-card { padding: 28px; } }
+
+      .pm-features { padding: 140px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .pm-sec-head { max-width: 780px; margin-bottom: 70px; }
+      .pm-sec-kicker { display: inline-block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: 18px; }
+      .pm-sec-kicker-light { color: var(--mint); }
+      .pm-sec-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 20px; }
+      .pm-sec-sub { font-size: 17px; color: rgba(6,46,35,0.6); line-height: 1.55; max-width: 620px; }
+      .pm-feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .pm-feat-card { position: relative; padding: 32px 28px 36px; border-radius: 24px; border: 1px solid var(--line); background: #fbfcfb; overflow: hidden; transition: .4s cubic-bezier(.6,.05,.2,1); cursor: pointer; }
+      .pm-feat-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(5,150,105,0.08), transparent 60%); opacity: 0; transition: .4s; }
+      .pm-feat-card:hover { transform: translateY(-6px); border-color: rgba(5,150,105,0.3); box-shadow: 0 30px 60px -30px rgba(5,150,105,0.35); }
+      .pm-feat-card:hover::before { opacity: 1; }
+      .pm-feat-card > * { position: relative; }
+      .pm-feat-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--ink); color: var(--paper); display: grid; place-items: center; margin-bottom: 20px; }
+      .pm-feat-icon svg { width: 22px; height: 22px; }
+      .pm-feat-tag { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--primary); margin-bottom: 10px; }
+      .pm-feat-card h3 { margin: 0 0 10px; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+      .pm-feat-card p { margin: 0; font-size: 14.5px; line-height: 1.55; color: rgba(6,46,35,0.6); }
+      .pm-feat-arrow { position: absolute; top: 28px; right: 28px; width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink); transition: .3s; }
+      .pm-feat-card:hover .pm-feat-arrow { background: var(--ink); color: var(--paper); transform: rotate(45deg); }
+      @media (max-width: 900px) { .pm-feat-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 600px) { .pm-feat-grid { grid-template-columns: 1fr; } }
+
+      .pm-split { padding: 140px 0; }
+      .pm-split-panel { background: #fff; border: 1px solid var(--line); border-radius: 28px; padding: 8px; box-shadow: 0 40px 80px -40px rgba(6,46,35,0.2); }
+      .pm-split-tabs { display: flex; gap: 4px; padding: 6px; background: rgba(6,46,35,0.04); border-radius: 22px; width: fit-content; margin-bottom: 8px; }
+      .pm-split-tab { padding: 10px 20px; background: transparent; border: none; border-radius: 16px; font-size: 14px; font-weight: 500; color: rgba(6,46,35,0.6); cursor: pointer; font-family: inherit; transition: .3s; }
+      .pm-split-tab:hover { color: var(--ink); }
+      .pm-split-tab.is-active { background: #fff; color: var(--ink); box-shadow: 0 6px 16px -8px rgba(6,46,35,0.2); }
+      .pm-split-body { padding: 32px 28px; }
+      .pm-split-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+      .pm-split-head em { display: block; font-style: normal; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: rgba(6,46,35,0.5); }
+      .pm-split-head strong { display: block; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 42px; margin-top: 4px; }
+      .pm-split-meta { font-size: 13px; color: rgba(6,46,35,0.55); }
+      .pm-split-meta span { color: var(--primary); font-weight: 600; }
+      .pm-split-list { display: flex; flex-direction: column; gap: 14px; }
+      .pm-split-row { display: grid; grid-template-columns: 34px 90px 1fr 80px; align-items: center; gap: 16px; }
+      .pm-split-avatar { width: 34px; height: 34px; border-radius: 999px; color: #fff; font-weight: 600; font-size: 13px; display: grid; place-items: center; }
+      .pm-split-name { font-size: 14.5px; font-weight: 500; }
+      .pm-split-bar { height: 10px; background: rgba(6,46,35,0.05); border-radius: 999px; overflow: hidden; }
+      .pm-split-fill { height: 100%; border-radius: 999px; transition: width .6s cubic-bezier(.6,.05,.2,1); }
+      .pm-split-amt { text-align: right; font-size: 15px; font-weight: 600; }
+
+      .pm-stats { padding: 140px 0; background: var(--ink); color: var(--paper); }
+      .pm-stats-head { max-width: 820px; margin-bottom: 70px; }
+      .pm-stats-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; color: var(--paper); }
+      .pm-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+      .pm-stat { padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.14); }
+      .pm-stat-n { font-family: 'Instrument Serif', serif; font-size: clamp(52px, 6vw, 84px); line-height: 1; color: var(--mint); letter-spacing: -0.03em; }
+      .pm-stat-t { margin-top: 18px; font-size: 15px; font-weight: 600; color: var(--paper); }
+      .pm-stat-d { margin-top: 6px; font-size: 13.5px; line-height: 1.5; color: rgba(255,255,255,0.55); }
+      @media (max-width: 900px) { .pm-stats-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 500px) { .pm-stats-grid { grid-template-columns: 1fr; } }
+
+      .pm-cta { padding: 60px 0 140px; }
+      .pm-cta-card { position: relative; overflow: hidden; padding: clamp(48px, 8vw, 100px) clamp(24px, 5vw, 80px); border-radius: 40px; background: radial-gradient(ellipse at top right, rgba(52,211,153,0.4), transparent 60%), linear-gradient(160deg, var(--ink), #0a4030); color: var(--paper); }
+      .pm-cta-orn { position: absolute; width: 500px; height: 500px; border-radius: 999px; background: radial-gradient(circle, var(--mint), transparent 70%); opacity: 0.2; top: -180px; right: -120px; }
+      .pm-cta-kick { display: inline-block; padding: 7px 14px; background: rgba(52,211,153,0.16); color: var(--mint); border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 24px; }
+      .pm-cta-title { position: relative; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(36px, 5vw, 68px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 20px; max-width: 800px; }
+      .pm-cta-sub { position: relative; font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.55; max-width: 560px; }
+      .pm-cta-actions { position: relative; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+      .pm-footer { padding: 80px 0 30px; background: #fff; border-top: 1px solid var(--line); }
+      .pm-footer-inner { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; padding-bottom: 60px; }
+      .pm-footer-brand { display: flex; flex-direction: column; gap: 12px; }
+      .pm-footer-brand > span { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+      .pm-footer-brand em { font-style: normal; color: var(--primary); font-weight: 400; }
+      .pm-footer-brand p { margin: 8px 0 0; font-size: 14px; color: rgba(6,46,35,0.55); max-width: 260px; }
+      .pm-footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+      .pm-footer-cols h5 { margin: 0 0 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: rgba(6,46,35,0.5); font-weight: 600; }
+      .pm-footer-cols a { display: block; padding: 5px 0; font-size: 14px; color: var(--ink); text-decoration: none; transition: color .2s; }
+      .pm-footer-cols a:hover { color: var(--primary); }
+      .pm-footer-base { display: flex; justify-content: space-between; padding: 24px 20px 0; max-width: 1240px; margin: 0 auto; border-top: 1px solid var(--line); font-size: 13px; color: rgba(6,46,35,0.5); }
+      @media (max-width: 760px) { .pm-footer-inner { grid-template-columns: 1fr; } .pm-footer-base { flex-direction: column; gap: 8px; text-align: center; justify-content: center; } }
+
+      .pm-simplify { padding: 140px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .pm-sec-title em { font-style: italic; color: var(--primary); }
+      .pm-simp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0 40px; }
+      .pm-simp-stat { padding: 22px 24px; border: 1px solid var(--line); border-radius: 20px; background: #fbfcfb; }
+      .pm-simp-stat strong { font-family: 'Instrument Serif', serif; font-size: 40px; line-height: 1; color: var(--primary); display: block; }
+      .pm-simp-stat span { display: block; margin-top: 8px; font-size: 13px; color: rgba(6,46,35,0.6); }
+      .pm-simp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .pm-simp-card { padding: 28px; border-radius: 24px; border: 1px solid var(--line); background: #fbfcfb; }
+      .pm-simp-card-after { background: var(--ink); color: var(--paper); border-color: transparent; }
+      .pm-simp-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .pm-simp-card header strong { font-size: 14px; opacity: .75; font-weight: 500; }
+      .pm-simp-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; background: rgba(6,46,35,0.08); color: var(--ink); }
+      .pm-simp-pill-good { background: rgba(52,211,153,0.18); color: var(--mint); }
+      .pm-simp-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+      .pm-simp-card li { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff; border-radius: 14px; font-size: 14px; }
+      .pm-simp-card-after li { background: rgba(255,255,255,0.06); }
+      .pm-simp-card li em { font-style: normal; margin-left: auto; font-weight: 600; }
+      @media (max-width: 780px) { .pm-simp-grid { grid-template-columns: 1fr; } .pm-simp-stats { grid-template-columns: 1fr; } }
+
+      .pm-analytics { padding: 140px 0; }
+      .pm-anal-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+      .pm-anal-card { padding: 28px; border-radius: 24px; border: 1px solid var(--line); background: #fff; }
+      .pm-anal-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .pm-anal-card header em { font-style: normal; font-size: 12px; color: rgba(6,46,35,0.55); text-transform: uppercase; letter-spacing: .1em; }
+      .pm-anal-card header strong { display: block; font-size: 18px; margin-top: 4px; font-weight: 600; }
+      .pm-anal-export { padding: 8px 14px; border-radius: 999px; background: rgba(6,46,35,0.05); border: 1px solid var(--line); font-size: 12.5px; cursor: pointer; font-family: inherit; color: var(--ink); }
+      .pm-donut-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center; }
+      .pm-donut { width: 220px; height: 220px; }
+      .pm-donut-lbl { font-size: 11px; fill: rgba(6,46,35,0.55); text-transform: uppercase; letter-spacing: .1em; }
+      .pm-donut-val { font-family: 'Instrument Serif', serif; font-size: 22px; fill: var(--ink); }
+      .pm-anal-legend { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+      .pm-anal-legend li { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+      .pm-anal-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+      .pm-anal-legend em { margin-left: auto; font-style: normal; color: rgba(6,46,35,0.55); font-variant-numeric: tabular-nums; }
+      .pm-anal-card footer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+      .pm-anal-card footer span { font-size: 11.5px; color: rgba(6,46,35,0.55); text-transform: uppercase; letter-spacing: .08em; }
+      .pm-anal-card footer strong { display: block; margin-top: 4px; font-size: 16px; font-weight: 600; }
+      .pm-up { color: var(--primary); }
+      .pm-anal-list h4 { margin: 0 0 16px; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.01em; }
+      .pm-anal-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+      .pm-anal-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; line-height: 1.5; color: rgba(6,46,35,0.75); }
+      .pm-anal-list li svg { color: var(--primary); margin-top: 3px; flex-shrink: 0; }
+      @media (max-width: 900px) { .pm-anal-grid { grid-template-columns: 1fr; } .pm-donut-wrap { grid-template-columns: 1fr; justify-items: center; } }
+
+      .pm-how { padding: 140px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .pm-how-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: pm-step; }
+      .pm-how-step { padding: 28px 24px; border: 1px solid var(--line); border-radius: 22px; background: #fbfcfb; transition: .3s cubic-bezier(.6,.05,.2,1); }
+      .pm-how-step:hover { transform: translateY(-4px); border-color: rgba(5,150,105,0.35); background: #fff; }
+      .pm-how-n { display: inline-block; font-family: 'Instrument Serif', serif; font-size: 34px; color: var(--primary); line-height: 1; margin-bottom: 14px; }
+      .pm-how-step strong { display: block; font-size: 17px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+      .pm-how-step p { margin: 0; font-size: 14px; color: rgba(6,46,35,0.6); line-height: 1.55; }
+      @media (max-width: 900px) { .pm-how-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 560px) { .pm-how-grid { grid-template-columns: 1fr; } }
+
+      .pm-cta-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 40px; }
+      .pm-cta-chip { padding: 16px 18px; border-radius: 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+      .pm-cta-chip strong { display: block; font-size: 14px; font-weight: 600; color: var(--paper); }
+      .pm-cta-chip span { display: block; margin-top: 4px; font-size: 12.5px; color: rgba(245,247,244,0.6); }
+      @media (max-width: 780px) { .pm-cta-chips { grid-template-columns: 1fr; } }
+    `}</style>
   );
 }
