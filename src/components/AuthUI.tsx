@@ -149,7 +149,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
           <div className="bg-[#151f30] flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
             
             <div className="flex items-center gap-3 mb-2">
-              <img src="/logo.png" alt="Logo" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]" />
+              <img src="/green logo.png" alt="Logo" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]" />
               <span className="font-space text-3xl font-bold text-white">
                 Pay<span className="text-violet-400">Mint</span> Verse
               </span>
@@ -258,7 +258,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
           <div className="bg-[#151f30] flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
             
             <div className="flex items-center gap-3 mb-2">
-              <img src="/logo.png" alt="Logo" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]" />
+              <img src="/green logo.png" alt="Logo" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]" />
               <span className="font-space text-3xl font-bold text-white">
                 Pay<span className="text-violet-400">Mint</span> Verse
               </span>

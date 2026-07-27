@@ -1,756 +1,1134 @@
 'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import RotatingText from "@/components/RotatingText/RotatingText";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import {
+  ArrowRight,
+  ArrowUpRight,
+  Play,
+  Pause,
   Users,
-  Calculator,
-  CheckCircle,
   Receipt,
-  Clock,
+  Scale,
+  Wallet,
+  BarChart3,
+  ShieldCheck,
+  Sparkles,
+  Plus,
+  Check,
+  ChevronDown,
   Utensils,
-  Fuel,
-  Building,
-  GraduationCap,
-  Home,
-  Briefcase
+  Plane,
+  Home as HomeIcon,
+  Zap,
 } from "lucide-react";
 
-const MEMBERS = [
-  {
-    id: "umar-amt",
-    initial: "U",
-    color: "bg-violet-900/40 text-violet-300",
-    name: "Umar",
-    sub: "paid Rs. 4,800",
-    startAmt: "+Rs. 3,600",
-    positive: true,
-  },
-  {
-    id: "ali-amt",
-    initial: "A",
-    color: "bg-cyan-900/30 text-cyan-300",
-    name: "Ali",
-    sub: "owes Umar",
-    startAmt: "-Rs. 1,200",
-    positive: false,
-  },
-  {
-    id: "hamza-amt",
-    initial: "H",
-    color: "bg-emerald-900/30 text-emerald-300",
-    name: "Hamza",
-    sub: "owes Umar",
-    startAmt: "-Rs. 1,200",
-    positive: false,
-  },
-  {
-    id: "farhan-amt",
-    initial: "F",
-    color: "bg-amber-900/30 text-amber-300",
-    name: "Farhan",
-    sub: "owes Umar",
-    startAmt: "-Rs. 1,200",
-    positive: false,
-  },
-];
+const EMERALD = {
+  ink: "#062e23",
+  primary: "#059669",
+  secondary: "#10B981",
+  mint: "#34D399",
+  light: "#6EE7B7",
+  paper: "#F5F7F4",
+};
 
-const EXPENSES = [
-  {
-    icon: Utensils,
-    bg: "bg-violet-900/20 text-violet-400",
-    title: "Dinner at Salt",
-    by: "Paid by Umar",
-    amt: "Rs. 4,800",
-  },
-  {
-    icon: Fuel,
-    bg: "bg-cyan-900/15 text-cyan-400",
-    title: "Petrol",
-    by: "Paid by Ali",
-    amt: "Rs. 2,400",
-  },
-  {
-    icon: Building,
-    bg: "bg-amber-900/15 text-amber-400",
-    title: "Hotel room",
-    by: "Paid by Farhan",
-    amt: "Rs. 8,000",
-  },
-];
-
-const SETTLE_MESSAGES = [
-  {
-    id: "ali-amt",
-    newAmt: "+Rs. 2,400",
-    newUmarAmt: "+Rs. 2,400",
-    msg: "✓ Ali settled · Rs. 1,200",
-    settled: false,
-  },
-  {
-    id: "hamza-amt",
-    newAmt: "+Rs. 1,200",
-    newUmarAmt: "+Rs. 1,200",
-    msg: "✓ Hamza settled · Rs. 1,200",
-    settled: false,
-  },
-  {
-    id: "farhan-amt",
-    newAmt: "Settled ✓",
-    newUmarAmt: "Rs. 0",
-    msg: "✓ All settled up! 🎉",
-    settled: true,
-  },
-];
-
-// ─── Live Debt Card ─────────────────────────────────────────────────────────────
-function DebtCard() {
-  const progressRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
-  const idxRef = useRef(0);
+export default function Homepage() {
+  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
 
-    const reset = () => {
-      MEMBERS.forEach((m) => {
-        const el = document.getElementById(m.id);
-        if (!el) return;
-        el.textContent = m.startAmt;
-        el.className = `font-space text-[15px] font-bold ${m.positive ? "text-emerald-400" : "text-red-400"}`;
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    lenis.on("scroll", ScrollTrigger.update);
+    const raf = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    const id = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(id);
+      lenis.destroy();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!root.current) return;
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { y: 60, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%" },
+          },
+        );
       });
-      if (progressRef.current) progressRef.current.style.width = "0%";
-      if (textRef.current)
-        textRef.current.textContent = "✓ Ali settled · Rs. 1,200";
-      idxRef.current = 0;
-      timer = setTimeout(runSettle, 1200);
-    };
 
-    const runSettle = () => {
-      const cur = SETTLE_MESSAGES[idxRef.current];
-      if (textRef.current) textRef.current.textContent = cur.msg;
-      if (progressRef.current) progressRef.current.style.width = "0%";
+      gsap.utils.toArray<HTMLElement>("[data-split]").forEach((el) => {
+        const words = el.innerText.split(/(\s+)/);
+        el.innerHTML = words
+          .map((w) =>
+            w.trim()
+              ? `<span class="pm-word"><span class="pm-word-inner">${w}</span></span>`
+              : w,
+          )
+          .join("");
+        const inners = el.querySelectorAll<HTMLElement>(".pm-word-inner");
+        gsap.fromTo(
+          inners,
+          { yPercent: 110 },
+          {
+            yPercent: 0,
+            duration: 1,
+            ease: "power4.out",
+            stagger: 0.05,
+            scrollTrigger: { trigger: el, start: "top 85%" },
+          },
+        );
+      });
 
-      timer = setTimeout(() => {
-        if (progressRef.current) progressRef.current.style.width = "100%";
+      gsap.utils.toArray<HTMLElement>("[data-stagger]").forEach((container) => {
+        const items = container.querySelectorAll<HTMLElement>("[data-stagger-item]");
+        gsap.fromTo(
+          items,
+          { y: 40, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "power3.out",
+            stagger: 0.08,
+            scrollTrigger: { trigger: container, start: "top 82%" },
+          },
+        );
+      });
 
-        timer = setTimeout(() => {
-          const el = document.getElementById(cur.id);
-          if (el) {
-            el.textContent = cur.newAmt;
-            el.className = `font-space text-[15px] font-bold ${cur.settled ? "text-slate-400" : "text-slate-300"}`;
-          }
-          const umarEl = document.getElementById("umar-amt");
-          if (umarEl) {
-            umarEl.textContent = cur.newUmarAmt;
-            if (cur.newUmarAmt === "Rs. 0")
-              umarEl.className =
-                "font-space text-[15px] font-bold text-slate-400";
-          }
-
-          idxRef.current++;
-          if (idxRef.current < SETTLE_MESSAGES.length) {
-            timer = setTimeout(runSettle, 2000);
-          } else {
-            timer = setTimeout(reset, 2500);
-          }
-        }, 2400);
-      }, 400);
-    };
-
-    timer = setTimeout(runSettle, 1500);
-    return () => clearTimeout(timer);
+      gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
+        const speed = Number(el.dataset.parallax || 0.3);
+        gsap.to(el, {
+          yPercent: -speed * 100,
+          ease: "none",
+          scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+    }, root);
+    return () => ctx.revert();
   }, []);
 
   return (
-    <div className="relative w-full max-w-[420px] flex flex-col gap-3">
-      {/* Glow orbs */}
-      <div className="absolute -top-16 -right-10 w-72 h-72 rounded-full bg-violet-700/18 blur-[60px] pointer-events-none" />
-      <div className="absolute bottom-0 -left-14 w-52 h-52 rounded-full bg-indigo-600/12 blur-[60px] pointer-events-none" />
+    <div ref={root} className="pm-root">
+      <StyleTag />
+      <Nav />
+      <Hero />
+      <TrustStrip />
+      <ProblemSolution />
+      <FeaturesDeepDive />
+      <SplitDemo />
+      <SimplifySection />
+      <AnalyticsSection />
+      <HowItWorks />
+      <StatsSection />
+      <FinalCTA />
+      <Footer />
+    </div>
+  );
+}
 
-      {/* Debt summary card */}
-      <div className="relative bg-[#151f30] border border-violet-900/20 rounded-2xl p-5 shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="font-space text-[15px] font-semibold text-white">
-            Lahore Trip 🚌
-          </h4>
-          <span className="text-[11px] text-violet-400 bg-violet-900/25 px-2.5 py-0.5 rounded-full">
-            4 members
-          </span>
-        </div>
+function Nav() {
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
+  useEffect(() => {
+    let last = 0;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 30);
+      setHidden(y > last && y > 140);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-        {MEMBERS.map((m) => (
+  return (
+    <nav
+      className={`pm-nav ${hidden ? "is-hidden" : ""} ${scrolled ? "is-scrolled" : ""}`}
+      data-cursor-text=""
+    >
+      <div className="pm-nav-inner">
+        <Link href="/" className="pm-logo" data-cursor-text="home">
+          <LogoMark />
+          <span>PayMint<em>Verse</em></span>
+        </Link>
+
+        <div className="pm-nav-links">
+          <a href="#features" className="pm-navlink"><span>Features</span></a>
+          <a href="#how" className="pm-navlink"><span>How it works</span></a>
           <div
-            key={m.id}
-            className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-b-0"
+            className="pm-navlink pm-navlink-menu"
+            onMouseEnter={() => setOpenMenu(true)}
+            onMouseLeave={() => setOpenMenu(false)}
           >
-            <div className="flex items-center gap-2.5">
-              <div
-                className={`w-[34px] h-[34px] rounded-full flex items-center justify-center text-[13px] font-bold font-space ${m.color}`}
-              >
-                {m.initial}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">{m.name}</p>
-                <p className="text-[11px] text-slate-400">{m.sub}</p>
-              </div>
+            <span>Product <ChevronDown size={14} strokeWidth={2.4} /></span>
+            <div className={`pm-dropdown ${openMenu ? "is-open" : ""}`}>
+              {[
+                { t: "Smart splitting", d: "Four methods, one tap", icon: <Scale size={16} /> },
+                { t: "Debt simplification", d: "Fewest settlements", icon: <Zap size={16} /> },
+                { t: "Analytics", d: "See where money flows", icon: <BarChart3 size={16} /> },
+                { t: "Groups", d: "Trips, roommates, teams", icon: <Users size={16} /> },
+              ].map((i) => (
+                <a key={i.t} href="#features" className="pm-drop-item">
+                  <span className="pm-drop-icon">{i.icon}</span>
+                  <span>
+                    <strong>{i.t}</strong>
+                    <em>{i.d}</em>
+                  </span>
+                </a>
+              ))}
             </div>
-            <span
-              id={m.id}
-              className={`font-space text-[15px] font-bold transition-all duration-300 ${m.positive ? "text-emerald-400" : "text-red-400"}`}
-            >
-              {m.startAmt}
-            </span>
           </div>
-        ))}
-
-        <div className="mt-3.5 relative overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
-          <div
-            ref={progressRef}
-            className="absolute top-0 left-0 h-full bg-emerald-500/15 rounded-xl transition-[width] duration-1800 ease-in-out"
-            style={{ width: "0%" }}
-          />
-          <p
-            ref={textRef}
-            className="relative z-10 text-center py-3 text-sm font-semibold font-space"
-          >
-            ✓ Ali settled · Rs. 1,200
-          </p>
+          <a href="#pricing" className="pm-navlink"><span>Pricing</span></a>
         </div>
+
+        <a href="#cta" className="pm-cta-btn" data-cursor-text="get started">
+          <span>Get started</span>
+          <ArrowRight size={16} />
+        </a>
+      </div>
+    </nav>
+  );
+}
+
+function LogoMark() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="9" fill={EMERALD.ink} />
+      <path d="M8 22V10h6.5a4.5 4.5 0 010 9H12v3H8z" fill={EMERALD.mint} />
+      <circle cx="22" cy="12" r="2.5" fill={EMERALD.light} />
+    </svg>
+  );
+}
+
+function Hero() {
+  const [playing, setPlaying] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <section className="pm-hero">
+      <div className="pm-hero-ornaments" aria-hidden>
+        <div className="pm-blob pm-blob-1" data-parallax="0.15" />
+        <div className="pm-blob pm-blob-2" data-parallax="0.25" />
+        <div className="pm-grid-bg" />
       </div>
 
-      <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl px-5 py-4 shadow-2xl z-10">
-        <h5 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-3">
-          Recent expenses
-        </h5>
-        {EXPENSES.map((e, i) => {
-          const Icon = e.icon;
-          return (
-            <div
-              key={i}
-              className="flex items-center justify-between py-2 border-b border-white/5 last:border-b-0"
+      <div className="pm-container pm-hero-inner">
+        <div className="pm-eyebrow" data-reveal>
+          <span className="pm-dot" /> Smart expense management, reimagined
+        </div>
+
+        <h1 className="pm-hero-title">
+          <span className="pm-h1-line" data-split>Stop chasing people</span>
+          <span className="pm-h1-line pm-h1-italic-row">
+            <span data-split>for money.</span>
+            <button
+              className={`pm-video-inline ${expanded ? "is-expanded" : ""}`}
+              onClick={() => setExpanded((v) => !v)}
+              data-cursor-text={expanded ? "close" : "watch"}
+              aria-label="Product preview"
             >
-              <div className="flex items-center gap-2.5">
-                <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${e.bg}`}
-                >
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">{e.title}</p>
-                  <p className="text-[11px] text-slate-400">{e.by}</p>
-                </div>
-              </div>
-              <span className="font-space text-sm font-bold text-white">
-                {e.amt}
+              <MiniAppPreview />
+              <span className="pm-video-play">
+                {playing ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
               </span>
-            </div>
-          );
-        })}
+            </button>
+            <span data-split>Start</span>
+          </span>
+          <span className="pm-h1-line pm-h1-italic" data-split>settling.</span>
+        </h1>
+
+        <p className="pm-hero-sub" data-reveal>
+          PayMint Verse tracks group expenses, splits bills four ways, simplifies debts to the
+          fewest transactions possible, and settles in one tap. No spreadsheets. No IOUs. No
+          awkward group chats.
+        </p>
+
+        <div className="pm-hero-cta" data-reveal>
+          <a href="#cta" className="pm-btn-primary" data-cursor-text="create group">
+            <span>Create your group</span>
+            <ArrowRight size={17} />
+          </a>
+          <button
+            className="pm-btn-ghost"
+            onClick={() => setPlaying((v) => !v)}
+            data-cursor-text={playing ? "pause" : "play demo"}
+          >
+            <span className="pm-play-ico">{playing ? <Pause size={13} /> : <Play size={13} fill="currentColor" />}</span>
+            <span>Watch 45s demo</span>
+          </button>
+        </div>
+
+        <div className="pm-hero-mockup" data-reveal>
+          <HeroAppMockup />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MiniAppPreview() {
+  return (
+    <div className="pm-mini-preview">
+      <div className="pm-mini-row">
+        <div className="pm-mini-avatar" style={{ background: EMERALD.primary }}>M</div>
+        <div className="pm-mini-bar" />
+        <div className="pm-mini-amt">$42</div>
+      </div>
+      <div className="pm-mini-row">
+        <div className="pm-mini-avatar" style={{ background: EMERALD.mint }}>A</div>
+        <div className="pm-mini-bar" style={{ width: "60%" }} />
+        <div className="pm-mini-amt">$28</div>
       </div>
     </div>
   );
 }
 
-export default function HomePage() {
-  // Simple scroll effect for navbar
-  useEffect(() => {
-    const handleScroll = () => {
-      const nav = document.getElementById("main-nav");
-      if (nav) {
-        if (window.scrollY > 20) {
-          nav.classList.add("bg-[#0B1120]/90", "backdrop-blur-md", "shadow-sm", "border-white/10");
-          nav.classList.remove("bg-transparent", "border-transparent");
-        } else {
-          nav.classList.remove("bg-[#0B1120]/90", "backdrop-blur-md", "shadow-sm", "border-white/10");
-          nav.classList.add("bg-transparent", "border-transparent");
-        }
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+function HeroAppMockup() {
+  return (
+    <div className="pm-mockup">
+      <div className="pm-mockup-topbar">
+        <div className="pm-mockup-dots"><i /><i /><i /></div>
+        <div className="pm-mockup-url">paymint.verse / weekend-in-lisbon</div>
+      </div>
+      <div className="pm-mockup-body">
+        <aside className="pm-mockup-side">
+          <div className="pm-mock-group active">
+            <Plane size={15} /> Weekend in Lisbon
+          </div>
+          <div className="pm-mock-group"><HomeIcon size={15} /> Apartment 4B</div>
+          <div className="pm-mock-group"><Users size={15} /> Studio team</div>
+          <div className="pm-mock-group"><Utensils size={15} /> Supper club</div>
+          <button className="pm-mock-new"><Plus size={14} /> New group</button>
+        </aside>
+        <main className="pm-mockup-main">
+          <div className="pm-mock-head">
+            <div>
+              <h4>Weekend in Lisbon</h4>
+              <p>4 people · 12 expenses</p>
+            </div>
+            <div className="pm-mock-balance">
+              <span>You are owed</span>
+              <strong>$127.40</strong>
+            </div>
+          </div>
+          <div className="pm-mock-list">
+            {[
+              { icon: <HomeIcon size={14} />, t: "Airbnb — 3 nights", who: "Maya paid", amt: "$420.00" },
+              { icon: <Utensils size={14} />, t: "Time Out Market dinner", who: "You paid", amt: "$86.50" },
+              { icon: <Plane size={14} />, t: "Uber to airport", who: "Jonas paid", amt: "$34.20" },
+              { icon: <Sparkles size={14} />, t: "Fado night tickets", who: "You paid", amt: "$72.00" },
+            ].map((e, i) => (
+              <div key={i} className="pm-mock-item">
+                <span className="pm-mock-ico">{e.icon}</span>
+                <div className="pm-mock-txt">
+                  <strong>{e.t}</strong>
+                  <em>{e.who}</em>
+                </div>
+                <span className="pm-mock-amt">{e.amt}</span>
+              </div>
+            ))}
+          </div>
+          <div className="pm-mock-settle">
+            <div>
+              <em>Simplified settlement</em>
+              <strong>Jonas → You · $92.20</strong>
+            </div>
+            <button className="pm-mock-btn" data-cursor-text="settle">Settle up <ArrowRight size={13} /></button>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function TrustStrip() {
+  const items = [
+    "10k+ groups tracked",
+    "$50M+ split fairly",
+    "4.9★ user rating",
+    "0 spreadsheets required",
+    "Bank-level security",
+  ];
+  return (
+    <section className="pm-trust" data-reveal>
+      <p className="pm-trust-title">
+        Trusted by roommates, weekend crews, wedding parties, and remote teams in 40+ countries.
+      </p>
+      <div className="pm-trust-track">
+        <div className="pm-trust-inner">
+          {[...items, ...items].map((t, i) => (
+            <span key={i} className="pm-trust-item">
+              <span className="pm-trust-star">✦</span> {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProblemSolution() {
+  return (
+    <section className="pm-ps" id="how">
+      <div className="pm-container">
+        <div className="pm-ps-eyebrow" data-reveal>
+          <em>Why PayMint Verse</em>
+        </div>
+        <h2 className="pm-ps-title" data-split>
+          Group money is messy. We built the calm layer on top.
+        </h2>
+
+        <div className="pm-ps-grid" data-stagger>
+          <article className="pm-ps-card pm-ps-problem" data-stagger-item>
+            <span className="pm-ps-label">The problem</span>
+            <ul>
+              <li><span>1</span> Someone always pays, no one remembers who.</li>
+              <li><span>2</span> Splitting equally is unfair; splitting by shares is math.</li>
+              <li><span>3</span> Debts pile up in circles — A owes B owes C owes A.</li>
+              <li><span>4</span> The reminder chat gets muted after week two.</li>
+            </ul>
+          </article>
+          <article className="pm-ps-card pm-ps-solution" data-stagger-item>
+            <span className="pm-ps-label">The PayMint way</span>
+            <ul>
+              <li><Check size={16} /> Log an expense in three seconds, from anywhere.</li>
+              <li><Check size={16} /> Split evenly, by share, by percentage, or exact amount.</li>
+              <li><Check size={16} /> Our engine collapses circular debts into the fewest transfers.</li>
+              <li><Check size={16} /> One-tap settlement, receipt in your inbox, done.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturesDeepDive() {
+  const features = [
+    {
+      icon: <Receipt />,
+      title: "Log in seconds",
+      body: "Snap a receipt, pick a group, tag participants. We handle the rest.",
+      tag: "Capture",
+    },
+    {
+      icon: <Scale />,
+      title: "Four ways to split",
+      body: "Equal, unequal, percentage, or exact. Change your mind anytime.",
+      tag: "Fair",
+    },
+    {
+      icon: <Zap />,
+      title: "Debt simplification",
+      body: "Our graph engine reduces a mess of IOUs to the minimum number of transfers.",
+      tag: "Smart",
+    },
+    {
+      icon: <BarChart3 />,
+      title: "Real-time analytics",
+      body: "See spend by category, person, and month. Understand where money goes.",
+      tag: "Insight",
+    },
+    {
+      icon: <Wallet />,
+      title: "One-tap settlement",
+      body: "Settle inside the app or export to your payment method of choice.",
+      tag: "Close",
+    },
+    {
+      icon: <ShieldCheck />,
+      title: "Private by design",
+      body: "Row-level security. Your group stays your group. Nothing is sold, ever.",
+      tag: "Safe",
+    },
+  ];
+  return (
+    <section className="pm-features" id="features">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Features</span>
+          <h2 className="pm-sec-title" data-split>
+            A complete toolkit for shared money, without the friction.
+          </h2>
+          <p className="pm-sec-sub" data-reveal>
+            Every feature earns its place. Nothing you have to configure, nothing you have to
+            learn, nothing you have to babysit.
+          </p>
+        </div>
+
+        <div className="pm-feat-grid" data-stagger>
+          {features.map((f, i) => (
+            <article key={i} className="pm-feat-card" data-stagger-item data-cursor-text="explore">
+              <div className="pm-feat-icon">{f.icon}</div>
+              <span className="pm-feat-tag">{f.tag}</span>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+              <span className="pm-feat-arrow"><ArrowUpRight size={16} /></span>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SplitDemo() {
+  const methods = ["Equally", "By share", "By %", "Exact"] as const;
+  const [method, setMethod] = useState<(typeof methods)[number]>("Equally");
+  const people = [
+    { name: "You", color: EMERALD.primary },
+    { name: "Maya", color: EMERALD.mint },
+    { name: "Jonas", color: "#0f766e" },
+    { name: "Ari", color: EMERALD.light },
+  ];
+  const total = 240;
+  const values: Record<(typeof methods)[number], number[]> = {
+    Equally: [60, 60, 60, 60],
+    "By share": [96, 72, 48, 24],
+    "By %": [90, 60, 60, 30],
+    Exact: [110, 40, 55, 35],
+  };
 
   return (
-    <div className="min-h-screen bg-[#0B1120] text-white overflow-x-hidden font-sans selection:bg-violet-500/30">
-      
-      {/* ── 1. NAVBAR ── */}
-      <nav 
-        id="main-nav" 
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-[6%] h-[75px] bg-transparent border-b border-transparent transition-all duration-300"
-      >
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Logo" className="w-8 h-8 drop-shadow-[0_0_8px_rgba(124,58,237,0.4)]" />
-          <span className="font-space text-[22px] font-bold text-white">
-            Pay<span className="text-violet-400">Mint</span> Verse
-          </span>
+    <section className="pm-split">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Splits</span>
+          <h2 className="pm-sec-title" data-split>
+            Four ways to split. Zero arguments.
+          </h2>
         </div>
 
-        <ul className="hidden lg:flex gap-8">
-          {["Features", "How It Works", "About"].map((link) => (
-            <li key={link}>
-              <a
-                href="#"
-                className="text-[15px] font-medium text-slate-300 hover:text-white transition-colors"
+        <div className="pm-split-panel" data-reveal>
+          <div className="pm-split-tabs">
+            {methods.map((m) => (
+              <button
+                key={m}
+                onClick={() => setMethod(m)}
+                className={`pm-split-tab ${method === m ? "is-active" : ""}`}
+                data-cursor-text={m.toLowerCase()}
               >
-                {link}
-              </a>
+                {m}
+              </button>
+            ))}
+          </div>
+          <div className="pm-split-body">
+            <div className="pm-split-head">
+              <div>
+                <em>Dinner at Cantina</em>
+                <strong>${total.toFixed(2)}</strong>
+              </div>
+              <div className="pm-split-meta">Method · <span>{method}</span></div>
+            </div>
+            <div className="pm-split-list">
+              {people.map((p, i) => {
+                const v = values[method][i];
+                const pct = (v / total) * 100;
+                return (
+                  <div key={p.name} className="pm-split-row">
+                    <span className="pm-split-avatar" style={{ background: p.color }}>
+                      {p.name[0]}
+                    </span>
+                    <span className="pm-split-name">{p.name}</span>
+                    <div className="pm-split-bar">
+                      <div
+                        className="pm-split-fill"
+                        style={{ width: `${pct}%`, background: p.color }}
+                      />
+                    </div>
+                    <span className="pm-split-amt">${v.toFixed(2)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StatsSection() {
+  const stats = [
+    { n: "500K+", t: "Expenses tracked", d: "Across weekend trips, apartments, and remote teams." },
+    { n: "4.9", t: "User satisfaction", d: "Averaged across the App Store and Play Store." },
+    { n: "42%", t: "Fewer transfers", d: "Median reduction after debt simplification runs." },
+    { n: "1-tap", t: "To settle up", d: "Whether it is $6 or $600, closing out takes seconds." },
+  ];
+  return (
+    <section className="pm-stats">
+      <div className="pm-container">
+        <div className="pm-stats-head">
+          <span className="pm-sec-kicker pm-sec-kicker-light" data-reveal>By the numbers</span>
+          <h2 className="pm-stats-title" data-split>
+            Numbers that matter, from people who stopped arguing about money.
+          </h2>
+        </div>
+        <div className="pm-stats-grid" data-stagger>
+          {stats.map((s) => (
+            <div key={s.t} className="pm-stat" data-stagger-item>
+              <div className="pm-stat-n">{s.n}</div>
+              <div className="pm-stat-t">{s.t}</div>
+              <div className="pm-stat-d">{s.d}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SimplifySection() {
+  const before = [
+    { from: "Ali", to: "Ahmed", amt: "PKR 1,200" },
+    { from: "Ahmed", to: "Umar", amt: "PKR 1,200" },
+    { from: "Sara", to: "Ali", amt: "PKR 800" },
+    { from: "Umar", to: "Sara", amt: "PKR 400" },
+  ];
+  const after = [
+    { from: "Ali", to: "Umar", amt: "PKR 800" },
+    { from: "Sara", to: "Umar", amt: "PKR 400" },
+  ];
+  return (
+    <section className="pm-simplify" id="simplify">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Debt simplification</span>
+          <h2 className="pm-sec-title" data-split>
+            From tangled chains to the <em>fewest possible payments.</em>
+          </h2>
+          <p className="pm-sec-sub" data-reveal>
+            PayMint Verse runs a greedy algorithm across every net balance to collapse circular
+            debts. Ali → Ahmed → Umar becomes just Ali → Umar. Less friction, faster settlements,
+            fewer awkward reminders.
+          </p>
+        </div>
+
+        <div className="pm-simp-stats" data-stagger>
+          <div className="pm-simp-stat" data-stagger-item><strong>–68%</strong><span>Fewer transactions</span></div>
+          <div className="pm-simp-stat" data-stagger-item><strong>1 tap</strong><span>To settle up</span></div>
+          <div className="pm-simp-stat" data-stagger-item><strong>Instant</strong><span>Balance updates</span></div>
+        </div>
+
+        <div className="pm-simp-grid" data-stagger>
+          <div className="pm-simp-card" data-stagger-item>
+            <header><span className="pm-simp-pill">Before</span><strong>4 payments</strong></header>
+            <ul>
+              {before.map((p, i) => (
+                <li key={i}><span>{p.from}</span><ArrowRight size={13} /><span>{p.to}</span><em>{p.amt}</em></li>
+              ))}
+            </ul>
+          </div>
+          <div className="pm-simp-card pm-simp-card-after" data-stagger-item>
+            <header><span className="pm-simp-pill pm-simp-pill-good">After</span><strong>2 payments</strong></header>
+            <ul>
+              {after.map((p, i) => (
+                <li key={i}><span>{p.from}</span><ArrowRight size={13} /><span>{p.to}</span><em>{p.amt}</em></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AnalyticsSection() {
+  const cats = [
+    { t: "Food", p: 32, c: "#059669" },
+    { t: "Transport", p: 24, c: "#10B981" },
+    { t: "Stay", p: 18, c: "#34D399" },
+    { t: "Entertainment", p: 12, c: "#6EE7B7" },
+    { t: "Shopping", p: 8, c: "#a7f3d0" },
+    { t: "Utilities", p: 4, c: "#062e23" },
+    { t: "Other", p: 2, c: "#94a3b8" },
+  ];
+  const R = 70, C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <section className="pm-analytics" id="analytics">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>Analytics</span>
+          <h2 className="pm-sec-title" data-split>
+            The clearest picture of <em>where money actually goes.</em>
+          </h2>
+          <p className="pm-sec-sub" data-reveal>
+            Category breakdowns, monthly trends, per-person averages. Export any group to CSV in
+            one click for your own records or a shared accountant.
+          </p>
+        </div>
+
+        <div className="pm-anal-grid" data-stagger>
+          <div className="pm-anal-card pm-anal-donut" data-stagger-item>
+            <header>
+              <div><em>October</em><strong>Spending by category</strong></div>
+              <button className="pm-anal-export">Export CSV</button>
+            </header>
+            <div className="pm-donut-wrap">
+              <svg viewBox="0 0 200 200" className="pm-donut">
+                <circle cx="100" cy="100" r={R} fill="none" stroke="rgba(6,46,35,0.06)" strokeWidth="22" />
+                {cats.map((c) => {
+                  const len = (c.p / 100) * C;
+                  const dash = `${len} ${C - len}`;
+                  const offset = -acc;
+                  acc += len;
+                  return (
+                    <circle key={c.t} cx="100" cy="100" r={R} fill="none" stroke={c.c}
+                      strokeWidth="22" strokeDasharray={dash} strokeDashoffset={offset}
+                      transform="rotate(-90 100 100)" strokeLinecap="butt" />
+                  );
+                })}
+                <text x="100" y="94" textAnchor="middle" className="pm-donut-lbl">Total</text>
+                <text x="100" y="118" textAnchor="middle" className="pm-donut-val">PKR 68.4K</text>
+              </svg>
+              <ul className="pm-anal-legend">
+                {cats.map((c) => (
+                  <li key={c.t}><i style={{ background: c.c }} /><span>{c.t}</span><em>{c.p}%</em></li>
+                ))}
+              </ul>
+            </div>
+            <footer>
+              <div><span>Total</span><strong>PKR 68,420</strong></div>
+              <div><span>Avg / person</span><strong>PKR 17,105</strong></div>
+              <div><span>Vs last month</span><strong className="pm-up">+12.4%</strong></div>
+            </footer>
+          </div>
+
+          <div className="pm-anal-card pm-anal-list" data-stagger-item>
+            <h4>What you unlock</h4>
+            <ul>
+              {[
+                "Live category donut & monthly trend charts",
+                "Per-member spend, owed and settled totals",
+                "Filter by group, date range or category",
+                "One-click CSV export for any date range",
+              ].map((t) => (
+                <li key={t}><Check size={16} /> {t}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { n: "01", t: "Create a group", d: "Trip, apartment, team — invite by link. No accounts required." },
+    { n: "02", t: "Log expenses", d: "Snap a receipt or type it in. Three seconds, done." },
+    { n: "03", t: "Choose a split", d: "Equal, exact, share, or percentage — per expense." },
+    { n: "04", t: "Settle up", d: "PayMint collapses the chain. One tap via EasyPaisa or JazzCash." },
+  ];
+  return (
+    <section className="pm-how">
+      <div className="pm-container">
+        <div className="pm-sec-head">
+          <span className="pm-sec-kicker" data-reveal>How it works</span>
+          <h2 className="pm-sec-title" data-split>
+            Four steps between <em>chaos and calm.</em>
+          </h2>
+        </div>
+        <ol className="pm-how-grid" data-stagger>
+          {steps.map((s) => (
+            <li key={s.n} className="pm-how-step" data-stagger-item>
+              <span className="pm-how-n">{s.n}</span>
+              <strong>{s.t}</strong>
+              <p>{s.d}</p>
             </li>
           ))}
-        </ul>
+        </ol>
+      </div>
+    </section>
+  );
+}
 
-        <div className="flex items-center gap-4">
-          <Link href="/auth/login" className="text-[15px] font-medium text-slate-300 hover:text-white transition-colors hidden sm:block px-2">
-            Login
-          </Link>
-          <Link href="/auth/signup" className="px-5 py-2.5 text-[15px] font-semibold text-white bg-violet-700 rounded-xl hover:bg-violet-600 transition-colors shadow-[0_0_15px_rgba(124,58,237,0.2)]">
-            Get Started
-          </Link>
-        </div>
-      </nav>
-
-      {/* ── 2. HERO SECTION ── */}
-      <section className="pt-24 pb-20 px-[6%] grid grid-cols-1 lg:grid-cols-2 items-center gap-16 min-h-[90vh]">
-        <div className="max-w-[600px] relative z-10">
-          <h1 className="font-space text-[clamp(44px,5.5vw,72px)] font-bold leading-[1.1] tracking-tight mb-6">
-            Split{" "}
-            <RotatingText
-              texts={["bills.", "trips.", "dinners.", "rent.", "chai."]}
-              mainClassName="inline-flex px-4 py-1 bg-violet-700/30 text-violet-300 overflow-hidden rounded-2xl"
-              splitLevelClassName="overflow-hidden pb-1"
-              staggerFrom="last"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-120%" }}
-              staggerDuration={0.025}
-              transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              rotationInterval={3000}
-            />
-            <br />
-            <span className="text-violet-400">Not friendships.</span>
-          </h1>
-          
-          <p className="text-[18px] text-slate-400 leading-[1.7] mb-10 max-w-[480px]">
-            PayMint Verse tracks group expenses, calculates who owes whom, and settles debts — so your trips stay drama-free.
+function FinalCTA() {
+  return (
+    <section className="pm-cta" id="cta">
+      <div className="pm-container">
+        <div className="pm-cta-card">
+          <div className="pm-cta-orn" data-parallax="0.2" />
+          <span className="pm-cta-kick" data-reveal>Ready when you are</span>
+          <h2 className="pm-cta-title" data-split>
+            Start tracking shared expenses in the next 30 seconds.
+          </h2>
+          <p className="pm-cta-sub" data-reveal>
+            Free forever for personal groups. No credit card. Bring your friends, roommates, or
+            team along in one link.
           </p>
-          
-          <div className="flex flex-wrap gap-4">
-            <Link href="/auth/signup" className="px-8 py-4 text-[16px] font-semibold bg-violet-700 text-white rounded-xl hover:bg-violet-600 hover:-translate-y-px transition-all duration-200 shadow-[0_8px_24px_rgba(124,58,237,0.3)] inline-block text-center">
-              Create Group
-            </Link>
-            <button className="px-8 py-4 text-[16px] font-medium text-white border border-violet-900/40 rounded-xl hover:border-violet-400 bg-white/5 transition-colors">
-              View Demo
-            </button>
+          <div className="pm-cta-actions" data-reveal>
+            <a href="#" className="pm-btn-primary pm-btn-primary-lg" data-cursor-text="launch app">
+              <span>Launch PayMint Verse</span>
+              <ArrowRight size={18} />
+            </a>
+            <a href="#features" className="pm-btn-ghost pm-btn-ghost-light" data-cursor-text="learn">
+              <span>See every feature</span>
+            </a>
           </div>
-        </div>
-
-        {/* Right — live card */}
-        <div className="hidden lg:flex items-center justify-center relative z-10">
-          <DebtCard />
-        </div>
-      </section>
-
-      {/* ── 3. PROBLEM SECTION ── */}
-      <section className="px-[6%] py-28 bg-[#151f30]/40 border-y border-white/5">
-        <div className="text-center max-w-[700px] mx-auto mb-16">
-          <h2 className="font-space text-[clamp(32px,4vw,48px)] font-bold tracking-tight text-white mb-6">
-            Group expenses get messy fast.
-          </h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
-          {/* Card 1 */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-10 flex flex-col items-center text-center hover:border-violet-700/30 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-violet-900/30 border border-violet-700/40 flex items-center justify-center text-violet-400 mb-8">
-              <Receipt className="w-8 h-8" />
+          <div className="pm-cta-chips" data-stagger>
+            <div className="pm-cta-chip" data-stagger-item>
+              <strong>Free forever</strong><span>For personal groups</span>
             </div>
-            <h3 className="font-space text-xl font-bold text-white mb-4">Who paid for dinner?</h3>
-            <p className="text-slate-400 text-[15px] leading-[1.7]">Nobody remembers after a few days.</p>
-          </div>
-          
-          {/* Card 2 */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-10 flex flex-col items-center text-center hover:border-violet-700/30 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-violet-900/30 border border-violet-700/40 flex items-center justify-center text-violet-400 mb-8">
-              <Calculator className="w-8 h-8" />
+            <div className="pm-cta-chip" data-stagger-item>
+              <strong>No card required</strong><span>Sign up in seconds</span>
             </div>
-            <h3 className="font-space text-xl font-bold text-white mb-4">Who owes whom?</h3>
-            <p className="text-slate-400 text-[15px] leading-[1.7]">Manual calculations lead to mistakes.</p>
-          </div>
-          
-          {/* Card 3 */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-10 flex flex-col items-center text-center hover:border-violet-700/30 transition-colors">
-            <div className="w-16 h-16 rounded-2xl bg-violet-900/30 border border-violet-700/40 flex items-center justify-center text-violet-400 mb-8">
-              <Clock className="w-8 h-8" />
-            </div>
-            <h3 className="font-space text-xl font-bold text-white mb-4">Where's the money?</h3>
-            <p className="text-slate-400 text-[15px] leading-[1.7]">Settlements get forgotten and delayed.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. HOW IT WORKS ── */}
-      <section className="px-[6%] py-32 relative">
-        <h2 className="font-space text-[clamp(32px,4vw,48px)] font-bold tracking-tight text-white mb-20 text-center">
-          How It Works
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 relative max-w-[1200px] mx-auto">
-          {/* Connecting Line */}
-          <div className="hidden md:block absolute top-[28px] left-[15%] right-[15%] h-px bg-violet-900/50" />
-          
-          {/* Step 1 */}
-          <div className="relative text-center group">
-            <div className="w-14 h-14 rounded-full bg-[#0B1120] border-2 border-violet-600/50 text-violet-400 text-lg font-bold flex items-center justify-center mx-auto mb-6 relative z-10 font-space group-hover:bg-violet-900/20 transition-colors">1</div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Create Group</h3>
-            <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-5 inline-block text-left w-full max-w-[200px] mx-auto text-sm shadow-lg">
-              <div className="flex items-center gap-3 mb-3 text-slate-300 font-medium"><div className="w-2 h-2 rounded-full bg-violet-500" /> Hostel Room</div>
-              <div className="flex items-center gap-3 mb-3 text-slate-300 font-medium"><div className="w-2 h-2 rounded-full bg-cyan-500" /> Karachi Trip</div>
-              <div className="flex items-center gap-3 text-slate-300 font-medium"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Friends Circle</div>
-            </div>
-          </div>
-
-          {/* Step 2 */}
-          <div className="relative text-center group">
-            <div className="w-14 h-14 rounded-full bg-[#0B1120] border-2 border-violet-600/50 text-violet-400 text-lg font-bold flex items-center justify-center mx-auto mb-6 relative z-10 font-space group-hover:bg-violet-900/20 transition-colors">2</div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Add Expenses</h3>
-            <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-5 inline-block text-left w-full max-w-[200px] mx-auto text-sm shadow-lg">
-              <div className="flex items-center gap-3 mb-3 text-slate-300 font-medium"><Utensils className="w-4 h-4 text-orange-400" /> Dinner</div>
-              <div className="flex items-center gap-3 mb-3 text-slate-300 font-medium"><Fuel className="w-4 h-4 text-cyan-400" /> Fuel</div>
-              <div className="flex items-center gap-3 text-slate-300 font-medium"><Building className="w-4 h-4 text-violet-400" /> Hotel</div>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="relative text-center group">
-            <div className="w-14 h-14 rounded-full bg-[#0B1120] border-2 border-violet-600/50 text-violet-400 text-lg font-bold flex items-center justify-center mx-auto mb-6 relative z-10 font-space group-hover:bg-violet-900/20 transition-colors">3</div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Split Automatically</h3>
-            <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-5 inline-flex items-center justify-center w-full max-w-[200px] mx-auto h-[132px] text-center shadow-lg">
-              <p className="text-[15px] font-medium text-slate-300 leading-[1.6]">Equal split<br/>calculations</p>
-            </div>
-          </div>
-
-          {/* Step 4 */}
-          <div className="relative text-center group">
-            <div className="w-14 h-14 rounded-full bg-[#0B1120] border-2 border-violet-600/50 text-violet-400 text-lg font-bold flex items-center justify-center mx-auto mb-6 relative z-10 font-space group-hover:bg-violet-900/20 transition-colors">4</div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Settle Balances</h3>
-            <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-5 inline-flex items-center justify-center w-full max-w-[200px] mx-auto h-[132px] text-center shadow-lg">
-              <p className="text-[15px] font-medium text-slate-300 leading-[1.6]">Know exactly<br/>who owes whom</p>
+            <div className="pm-cta-chip" data-stagger-item>
+              <strong>Made in Pakistan</strong><span>EasyPaisa &amp; JazzCash built-in</span>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* ── 5. FEATURE SHOWCASE ── */}
-      <section className="py-24 bg-[#151f30]/20 border-y border-white/5 overflow-hidden">
-        <div className="max-w-[1200px] mx-auto px-[6%] space-y-32">
-          
-          {/* Feature 1 */}
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            <div className="flex-1 w-full relative max-w-[500px]">
-              <div className="absolute inset-0 bg-violet-600/20 blur-[80px] rounded-full" />
-              <div className="bg-[#0B1120] border border-violet-900/40 rounded-3xl p-6 md:p-8 relative shadow-2xl">
-                <div className="flex items-center gap-4 border-b border-white/5 pb-5 mb-5">
-                  <div className="w-12 h-12 bg-violet-900/40 rounded-xl flex items-center justify-center shrink-0">
-                    <Utensils className="w-5 h-5 text-violet-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-lg font-space">Dinner at Salt</p>
-                    <p className="text-slate-400 text-xs">Paid by Umar</p>
-                  </div>
-                  <div className="ml-auto text-right">
-                    <p className="text-white font-bold font-space">PKR 4,800</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-cyan-900/40 rounded-xl flex items-center justify-center shrink-0">
-                    <Fuel className="w-5 h-5 text-cyan-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-lg font-space">Petrol</p>
-                    <p className="text-slate-400 text-xs">Paid by Ali</p>
-                  </div>
-                  <div className="ml-auto text-right">
-                    <p className="text-white font-bold font-space">PKR 2,400</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-space text-[32px] md:text-[40px] font-bold text-white mb-6">Track Every Expense</h3>
-              <p className="text-slate-400 text-[17px] leading-[1.8]">
-                Log shared expenses the moment they happen. Add the payer, the total amount, and attach it to a specific group. No more scrolling through weeks of group chats to find out who paid for what.
-              </p>
-            </div>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="flex flex-col lg:flex-row-reverse items-center gap-16 lg:gap-24">
-            <div className="flex-1 w-full relative max-w-[500px]">
-              <div className="absolute inset-0 bg-red-600/10 blur-[80px] rounded-full" />
-              <div className="bg-[#0B1120] border border-violet-900/40 rounded-3xl p-6 md:p-8 relative shadow-2xl space-y-4">
-                <div className="flex justify-between items-center bg-[#151f30] rounded-2xl p-5 border border-white/5">
-                  <p className="text-slate-300 font-medium text-[15px]">Ali owes Umar</p>
-                  <p className="text-red-400 font-bold font-space text-lg">PKR 1,200</p>
-                </div>
-                <div className="flex justify-between items-center bg-[#151f30] rounded-2xl p-5 border border-white/5">
-                  <p className="text-slate-300 font-medium text-[15px]">Ahmed owes Umar</p>
-                  <p className="text-red-400 font-bold font-space text-lg">PKR 1,200</p>
-                </div>
-                <div className="flex justify-between items-center bg-[#151f30] rounded-2xl p-5 border border-white/5">
-                  <p className="text-slate-300 font-medium text-[15px]">Farhan owes Umar</p>
-                  <p className="text-red-400 font-bold font-space text-lg">PKR 1,200</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-space text-[32px] md:text-[40px] font-bold text-white mb-6">Automatic Balance Calculation</h3>
-              <p className="text-slate-400 text-[17px] leading-[1.8]">
-                Our algorithm automatically calculates the most efficient way to settle debts. Every time an expense is added, individual balances are updated instantly.
-              </p>
-            </div>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            <div className="flex-1 w-full relative max-w-[500px]">
-              <div className="absolute inset-0 bg-emerald-600/15 blur-[80px] rounded-full" />
-              <div className="bg-[#0B1120] border border-emerald-900/30 rounded-3xl p-8 relative shadow-2xl text-center">
-                <div className="w-20 h-20 rounded-full bg-emerald-900/30 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-10 h-10 text-emerald-400" />
-                </div>
-                <h4 className="font-space text-white font-bold text-2xl mb-2">Ali Settled Up</h4>
-                <p className="text-slate-400 text-[15px] mb-8">Paid PKR 1,200 to Umar</p>
-                <button className="w-full py-4 bg-emerald-500/10 text-emerald-400 font-bold rounded-2xl border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
-                  Mark as Received
-                </button>
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-space text-[32px] md:text-[40px] font-bold text-white mb-6">Settlement Tracking</h3>
-              <p className="text-slate-400 text-[17px] leading-[1.8]">
-                Record payments when someone pays you back. Keep everyone on the same page with a clear history of who settled up and when.
-              </p>
-            </div>
-          </div>
-          
+function Footer() {
+  return (
+    <footer className="pm-footer">
+      <div className="pm-container pm-footer-inner">
+        <div className="pm-footer-brand">
+          <LogoMark />
+          <span>PayMint<em>Verse</em></span>
+          <p>The calm layer on top of shared money.</p>
         </div>
-      </section>
-
-      {/* ── 6. INTERACTIVE DEMO PREVIEW ── */}
-      <section className="px-[6%] py-32 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-600/10 blur-[120px] rounded-full pointer-events-none" />
-        
-        <div className="max-w-[1000px] mx-auto">
-          <h2 className="font-space text-[clamp(32px,4vw,48px)] font-bold tracking-tight text-white mb-16 text-center">
-            Interactive Demo Preview
-          </h2>
-
-          <div className="bg-[#0B1120] border border-violet-900/40 rounded-[2rem] p-8 md:p-14 shadow-2xl relative z-10 flex flex-col md:flex-row gap-12 lg:gap-20">
-            {/* Left Side: Expense Info */}
-            <div className="flex-1 space-y-8">
-              <div>
-                <p className="text-[11px] text-violet-400 uppercase tracking-widest font-bold mb-2">Group</p>
-                <h3 className="text-3xl font-space font-bold text-white">Karachi Trip</h3>
-              </div>
-              
-              <div className="bg-[#151f30] rounded-3xl p-7 border border-white/5">
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-6">Expense Details</p>
-                <div className="flex items-center gap-5 mb-6">
-                  <div className="w-14 h-14 bg-orange-900/20 border border-orange-700/30 rounded-2xl flex items-center justify-center shrink-0">
-                    <Utensils className="w-6 h-6 text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="font-space text-white font-bold text-xl mb-1">Pizza</p>
-                    <p className="text-slate-400 text-[13px]">Paid by <span className="text-white font-medium">Umar</span></p>
-                  </div>
-                  <div className="ml-auto text-right">
-                    <p className="font-space text-white font-bold text-2xl">PKR 4000</p>
-                  </div>
-                </div>
-                <div className="pt-5 border-t border-white/5 flex justify-between items-center text-[15px]">
-                  <span className="text-slate-400">Split among 4 members</span>
-                  <span className="text-white font-medium bg-white/5 px-3 py-1.5 rounded-lg">Each owes PKR 1000</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="w-px bg-white/10 hidden md:block" />
-
-            {/* Right Side: Balances */}
-            <div className="flex-1 flex flex-col justify-center">
-              <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-6">Live Balances</p>
-              <div className="space-y-4">
-                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-red-400 font-bold font-space">A</div>
-                    <span className="text-slate-300 font-medium">Ali &rarr; Umar</span>
-                  </div>
-                  <span className="text-red-400 font-bold font-space text-lg">1000</span>
-                </div>
-                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-red-400 font-bold font-space">Ah</div>
-                    <span className="text-slate-300 font-medium">Ahmed &rarr; Umar</span>
-                  </div>
-                  <span className="text-red-400 font-bold font-space text-lg">1000</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 7. USE CASES ── */}
-      <section className="px-[6%] py-32 bg-[#151f30]/40 border-y border-white/5">
-        <h2 className="font-space text-[clamp(32px,4vw,48px)] font-bold tracking-tight text-white mb-20 text-center">
-          Built for every shared expense.
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[1200px] mx-auto">
-          {/* Students */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-8 hover:border-violet-500/30 transition-colors">
-            <div className="w-12 h-12 bg-violet-900/30 rounded-xl flex items-center justify-center mb-6">
-              <GraduationCap className="w-6 h-6 text-violet-400" />
-            </div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Students</h3>
-            <ul className="space-y-4 text-slate-400 text-[15px]">
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Hostel expenses</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> University trips</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Group projects</li>
-            </ul>
-          </div>
-          {/* Friends */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-8 hover:border-violet-500/30 transition-colors">
-            <div className="w-12 h-12 bg-violet-900/30 rounded-xl flex items-center justify-center mb-6">
-              <Users className="w-6 h-6 text-violet-400" />
-            </div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Friends</h3>
-            <ul className="space-y-4 text-slate-400 text-[15px]">
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Road trips</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Dinners</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Events</li>
-            </ul>
-          </div>
-          {/* Families */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-8 hover:border-violet-500/30 transition-colors">
-            <div className="w-12 h-12 bg-violet-900/30 rounded-xl flex items-center justify-center mb-6">
-              <Home className="w-6 h-6 text-violet-400" />
-            </div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Families</h3>
-            <ul className="space-y-4 text-slate-400 text-[15px]">
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Utilities</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Household expenses</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Shared purchases</li>
-            </ul>
-          </div>
-          {/* Teams */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-3xl p-8 hover:border-violet-500/30 transition-colors">
-            <div className="w-12 h-12 bg-violet-900/30 rounded-xl flex items-center justify-center mb-6">
-              <Briefcase className="w-6 h-6 text-violet-400" />
-            </div>
-            <h3 className="font-space text-xl font-bold text-white mb-6">Teams</h3>
-            <ul className="space-y-4 text-slate-400 text-[15px]">
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Subscriptions</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Office outings</li>
-              <li className="flex items-center gap-3"><div className="w-1.5 h-1.5 bg-violet-400 rounded-full shrink-0" /> Shared budgets</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 8. WHY PAYMINT VERSE (Philosophy) ── */}
-      <section className="px-[6%] py-32 text-center max-w-[800px] mx-auto">
-        <h2 className="font-space text-[clamp(32px,4vw,48px)] font-bold tracking-tight text-white mb-8">
-          Designed to keep friendships intact.
-        </h2>
-        <p className="text-[18px] md:text-[20px] text-slate-400 leading-[1.8]">
-          Money shouldn't create confusion between people.<br className="hidden md:block"/>
-          PayMint Verse helps groups stay transparent,<br className="hidden md:block"/>
-          organized, and fair.
-        </p>
-      </section>
-
-      {/* ── DEVELOPMENT JOURNEY ── */}
-      <section className="px-[6%] py-24 border-t border-white/5 bg-[#0B1120]">
-        <div className="max-w-[900px] mx-auto bg-gradient-to-br from-[#151f30] to-[#0B1120] border border-violet-900/40 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
-          <p className="text-[12px] font-bold uppercase tracking-widest text-violet-400 mb-4">
-            Development Journey
-          </p>
-          <h2 className="font-space text-3xl md:text-4xl font-bold text-white mb-8">
-            Why I Built PayMint Verse
-          </h2>
-          <p className="text-slate-300 leading-[1.9] text-[16px] md:text-[18px] max-w-[700px]">
-            As a CS student, I noticed that splitting expenses during trips and university activities was always confusing. PayMint Verse started as a project to solve that problem while helping me learn system design and full-stack development.
-          </p>
-        </div>
-      </section>
-
-      {/* ── 9. CALL TO ACTION ── */}
-      <section className="px-[6%] py-32 bg-[#080c14] border-t border-white/5 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-violet-900/5 pointer-events-none" />
-        <div className="relative z-10 max-w-[700px] mx-auto">
-          <h2 className="font-space text-[clamp(36px,4.5vw,56px)] font-bold tracking-tight text-white mb-12">
-            Ready to stop arguing over expenses?
-          </h2>
-          <div className="flex flex-wrap gap-5 justify-center">
-            <Link href="/auth/signup" className="px-10 py-5 text-[16px] font-bold bg-violet-700 text-white rounded-2xl hover:bg-violet-600 hover:-translate-y-1 transition-all duration-300 shadow-[0_10px_30px_rgba(124,58,237,0.3)] inline-block text-center">
-              Create Your First Group
-            </Link>
-            <button className="px-10 py-5 text-[16px] font-semibold text-white border border-white/10 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-              Explore Demo
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 10. FOOTER ── */}
-      <footer className="px-[6%] py-20 bg-[#0B1120] border-t border-white/10 relative z-10">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 mb-20">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <img src="/logo.png" alt="Logo" className="w-7 h-7" />
-              <span className="font-space text-2xl font-bold text-white">
-                Pay<span className="text-violet-400">Mint</span> Verse
-              </span>
-            </div>
-            <p className="text-slate-400 text-[15px] max-w-[320px] leading-[1.8]">
-              A modern platform to track shared expenses, calculate balances, and settle debts efficiently.
-            </p>
-          </div>
-          
+        <div className="pm-footer-cols">
           <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">Product</h4>
-            <ul className="space-y-4 text-[15px] text-slate-400">
-              <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Groups</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Expenses</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Settlements</a></li>
-            </ul>
+            <h5>Product</h5>
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#pricing">Pricing</a>
           </div>
-
           <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">Resources</h4>
-            <ul className="space-y-4 text-[15px] text-slate-400 mb-10">
-              <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">GitHub</a></li>
-            </ul>
-            
-            <h4 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">Social</h4>
-            <ul className="space-y-4 text-[15px] text-slate-400">
-              <li><a href="#" className="hover:text-white transition-colors">LinkedIn</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">GitHub</a></li>
-            </ul>
+            <h5>Company</h5>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Careers</a>
+          </div>
+          <div>
+            <h5>Legal</h5>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Security</a>
           </div>
         </div>
+      </div>
+      <div className="pm-footer-base">
+        <span>© {new Date().getFullYear()} PayMint Verse</span>
+        <span>Built with intention in emerald.</span>
+      </div>
+    </footer>
+  );
+}
 
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[14px] text-slate-500">
-          <p>© 2026 PayMint Verse</p>
-          <p>Built by Muhammad Umar</p>
-        </div>
-      </footer>
-      
-    </div>
+function StyleTag() {
+  return (
+    <style>{`
+      .pm-root {
+        --ink: ${EMERALD.ink};
+        --primary: ${EMERALD.primary};
+        --secondary: ${EMERALD.secondary};
+        --mint: ${EMERALD.mint};
+        --light: ${EMERALD.light};
+        --paper: ${EMERALD.paper};
+        --line: rgba(6,46,35,0.09);
+        font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        overflow-x: hidden;
+      }
+      .pm-root * { box-sizing: border-box; }
+      .pm-container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px); }
+
+      .pm-nav { position: fixed; top: 14px; left: 0; right: 0; z-index: 100;
+        transition: transform .5s cubic-bezier(.6,.05,.2,1), top .3s; }
+      .pm-nav.is-hidden { transform: translateY(-140%); }
+      .pm-nav.is-scrolled { top: 10px; }
+      .pm-nav-inner {
+        display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        max-width: 1180px; margin: 0 auto; padding: 10px 14px 10px 22px;
+        background: rgba(255,255,255,0.78); backdrop-filter: blur(18px) saturate(1.4);
+        border: 1px solid rgba(6,46,35,0.08); border-radius: 999px;
+        box-shadow: 0 10px 30px -18px rgba(6,46,35,0.25);
+      }
+      .pm-logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+      .pm-logo em { font-style: normal; font-weight: 400; color: var(--primary); }
+      .pm-nav-links { display: flex; align-items: center; gap: 6px; }
+      .pm-navlink { position: relative; padding: 8px 14px; font-size: 14px; color: var(--ink); text-decoration: none; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+      .pm-navlink > span { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 4px; }
+      .pm-navlink::before { content: ''; position: absolute; inset: 0; background: rgba(6,46,35,0.06); border-radius: 999px; transform: scale(.7); opacity: 0; transition: .3s cubic-bezier(.6,.05,.2,1); }
+      .pm-navlink:hover::before { transform: scale(1); opacity: 1; }
+      .pm-navlink-menu { padding-right: 12px; }
+      .pm-dropdown { position: absolute; top: calc(100% + 10px); left: 50%; transform: translate(-50%, -8px); background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 10px; width: 320px; opacity: 0; pointer-events: none; transition: .35s cubic-bezier(.6,.05,.2,1); box-shadow: 0 24px 50px -20px rgba(6,46,35,0.2); }
+      .pm-dropdown.is-open { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+      .pm-drop-item { display: flex; gap: 12px; padding: 10px 12px; border-radius: 14px; align-items: center; text-decoration: none; color: var(--ink); transition: background .25s; }
+      .pm-drop-item:hover { background: rgba(5,150,105,0.08); }
+      .pm-drop-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(5,150,105,0.1); color: var(--primary); display: grid; place-items: center; }
+      .pm-drop-item strong { display: block; font-size: 13.5px; font-weight: 600; }
+      .pm-drop-item em { display: block; font-style: normal; font-size: 12px; color: rgba(6,46,35,0.55); margin-top: 2px; }
+      .pm-cta-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px 10px 20px; background: var(--ink); color: var(--paper); border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 500; transition: transform .3s, background .3s; }
+      .pm-cta-btn:hover { transform: translateY(-1px); background: var(--primary); }
+      @media (max-width: 820px) { .pm-nav-links { display: none; } }
+
+      .pm-hero { position: relative; padding: 160px 0 80px; overflow: hidden; }
+      .pm-hero-ornaments { position: absolute; inset: 0; pointer-events: none; }
+      .pm-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(6,46,35,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(6,46,35,0.05) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at top, black, transparent 70%); }
+      .pm-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55; }
+      .pm-blob-1 { width: 520px; height: 520px; background: radial-gradient(circle, ${EMERALD.mint}, transparent 70%); top: -140px; right: -100px; }
+      .pm-blob-2 { width: 400px; height: 400px; background: radial-gradient(circle, ${EMERALD.light}, transparent 70%); top: 240px; left: -120px; opacity: 0.4; }
+      .pm-hero-inner { position: relative; }
+
+      .pm-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.6); backdrop-filter: blur(8px); border-radius: 999px; font-size: 12.5px; font-weight: 500; color: var(--ink); }
+      .pm-dot { width: 6px; height: 6px; border-radius: 999px; background: var(--primary); box-shadow: 0 0 0 4px rgba(5,150,105,0.18); }
+
+      .pm-hero-title { margin: 22px 0 30px; font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; font-size: clamp(48px, 8vw, 108px); line-height: 0.98; letter-spacing: -0.03em; }
+      .pm-h1-line { display: block; }
+      .pm-h1-italic, .pm-h1-italic-row span[data-split]:last-child, .pm-h1-italic-row > span:last-child { font-style: italic; color: var(--primary); }
+      .pm-h1-italic-row { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+      .pm-word { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1; padding-bottom: 0.06em; }
+      .pm-word-inner { display: inline-block; }
+
+      .pm-video-inline { position: relative; display: inline-flex; width: clamp(130px, 15vw, 200px); height: clamp(52px, 6vw, 78px); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #fff; cursor: pointer; vertical-align: middle; transition: transform .5s cubic-bezier(.6,.05,.2,1), width .5s, height .5s; padding: 0; }
+      .pm-video-inline:hover { transform: translateY(-2px) rotate(-1deg); }
+      .pm-video-inline.is-expanded { width: clamp(230px, 22vw, 320px); height: clamp(88px, 9vw, 120px); }
+      .pm-video-play { position: absolute; bottom: 8px; right: 8px; width: 26px; height: 26px; background: var(--ink); color: var(--paper); border-radius: 999px; display: grid; place-items: center; }
+
+      .pm-mini-preview { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; height: 100%; justify-content: center; }
+      .pm-mini-row { display: flex; align-items: center; gap: 8px; }
+      .pm-mini-avatar { width: 22px; height: 22px; border-radius: 999px; color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; font-family: 'Inter'; }
+      .pm-mini-bar { flex: 1; height: 6px; border-radius: 999px; background: linear-gradient(90deg, ${EMERALD.primary}, ${EMERALD.mint}); width: 80%; }
+      .pm-mini-amt { font-family: 'Inter'; font-size: 11px; font-weight: 600; color: var(--ink); }
+
+      .pm-hero-sub { max-width: 640px; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.55; color: rgba(6,46,35,0.7); }
+      .pm-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+      .pm-btn-primary { display: inline-flex; align-items: center; gap: 10px; padding: 15px 22px 15px 26px; background: var(--ink); color: var(--paper); border-radius: 999px; font-size: 15px; font-weight: 500; text-decoration: none; transition: .3s cubic-bezier(.6,.05,.2,1); position: relative; overflow: hidden; }
+      .pm-btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, var(--primary), var(--mint)); opacity: 0; transition: .3s; }
+      .pm-btn-primary > * { position: relative; z-index: 1; }
+      .pm-btn-primary:hover::before { opacity: 1; }
+      .pm-btn-primary:hover { transform: translateY(-2px); }
+      .pm-btn-primary-lg { padding: 18px 26px 18px 30px; font-size: 16px; }
+
+      .pm-btn-ghost { display: inline-flex; align-items: center; gap: 10px; padding: 15px 20px; background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; transition: .3s; font-family: inherit; }
+      .pm-btn-ghost:hover { background: rgba(6,46,35,0.05); transform: translateY(-2px); }
+      .pm-play-ico { width: 24px; height: 24px; background: rgba(5,150,105,0.15); color: var(--primary); border-radius: 999px; display: grid; place-items: center; }
+      .pm-btn-ghost-light { color: var(--paper); border-color: rgba(255,255,255,0.24); }
+      .pm-btn-ghost-light:hover { background: rgba(255,255,255,0.08); }
+
+      .pm-hero-mockup { margin-top: 80px; border-radius: 26px; overflow: hidden; box-shadow: 0 40px 80px -30px rgba(6,46,35,0.32), 0 0 0 1px var(--line); background: #fff; }
+      .pm-mockup-topbar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: linear-gradient(180deg, #fff, #f4f7f4); border-bottom: 1px solid var(--line); }
+      .pm-mockup-dots { display: flex; gap: 6px; }
+      .pm-mockup-dots i { width: 10px; height: 10px; border-radius: 999px; background: var(--line); display: inline-block; }
+      .pm-mockup-dots i:nth-child(1) { background: #ff7369; } .pm-mockup-dots i:nth-child(2) { background: #ffbc42; } .pm-mockup-dots i:nth-child(3) { background: var(--mint); }
+      .pm-mockup-url { font-size: 12px; color: rgba(6,46,35,0.55); background: rgba(6,46,35,0.05); padding: 5px 12px; border-radius: 999px; margin: 0 auto; }
+      .pm-mockup-body { display: grid; grid-template-columns: 220px 1fr; min-height: 460px; }
+      .pm-mockup-side { padding: 20px 12px; border-right: 1px solid var(--line); background: #fbfcfb; display: flex; flex-direction: column; gap: 4px; }
+      .pm-mock-group { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; font-size: 13.5px; color: rgba(6,46,35,0.75); cursor: pointer; transition: background .2s; }
+      .pm-mock-group:hover { background: rgba(6,46,35,0.05); }
+      .pm-mock-group.active { background: var(--ink); color: var(--paper); }
+      .pm-mock-new { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px dashed rgba(6,46,35,0.2); background: transparent; border-radius: 12px; color: rgba(6,46,35,0.6); font-size: 13px; cursor: pointer; font-family: inherit; }
+      .pm-mockup-main { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+      .pm-mock-head { display: flex; justify-content: space-between; align-items: flex-start; }
+      .pm-mock-head h4 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+      .pm-mock-head p { margin: 0; font-size: 13px; color: rgba(6,46,35,0.55); }
+      .pm-mock-balance { text-align: right; }
+      .pm-mock-balance span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: rgba(6,46,35,0.5); }
+      .pm-mock-balance strong { display: block; font-size: 24px; font-weight: 600; color: var(--primary); margin-top: 2px; }
+      .pm-mock-list { display: flex; flex-direction: column; }
+      .pm-mock-item { display: flex; align-items: center; gap: 14px; padding: 14px 6px; border-bottom: 1px solid var(--line); }
+      .pm-mock-item:last-child { border-bottom: none; }
+      .pm-mock-ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(5,150,105,0.1); color: var(--primary); display: grid; place-items: center; }
+      .pm-mock-txt { flex: 1; }
+      .pm-mock-txt strong { display: block; font-size: 14px; font-weight: 500; }
+      .pm-mock-txt em { display: block; font-style: normal; font-size: 12px; color: rgba(6,46,35,0.5); margin-top: 2px; }
+      .pm-mock-amt { font-size: 14px; font-weight: 600; }
+      .pm-mock-settle { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: linear-gradient(120deg, rgba(5,150,105,0.08), rgba(52,211,153,0.08)); border-radius: 16px; border: 1px solid rgba(5,150,105,0.15); }
+      .pm-mock-settle em { display: block; font-style: normal; font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: rgba(6,46,35,0.55); }
+      .pm-mock-settle strong { display: block; margin-top: 2px; font-size: 15px; font-weight: 600; }
+      .pm-mock-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: var(--ink); color: var(--paper); border: none; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: transform .3s, background .3s; }
+      .pm-mock-btn:hover { transform: translateY(-1px); background: var(--primary); }
+      @media (max-width: 720px) { .pm-mockup-body { grid-template-columns: 1fr; } .pm-mockup-side { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--line); } .pm-mock-new { display: none; } }
+
+      .pm-trust { padding: 60px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; overflow: hidden; }
+      .pm-trust-title { max-width: 900px; margin: 0 auto 30px; padding: 0 20px; text-align: center; font-size: clamp(16px, 1.4vw, 19px); color: rgba(6,46,35,0.65); line-height: 1.5; }
+      .pm-trust-track { overflow: hidden; }
+      .pm-trust-inner { display: flex; gap: 60px; animation: pm-marq2 30s linear infinite; width: max-content; }
+      @keyframes pm-marq2 { to { transform: translateX(-50%); } }
+      .pm-trust-item { display: inline-flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+      .pm-trust-star { color: var(--primary); }
+
+      .pm-ps { padding: 140px 0; }
+      .pm-ps-eyebrow em { font-style: italic; font-family: 'Instrument Serif', serif; font-size: 18px; color: var(--primary); }
+      .pm-ps-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; margin: 12px 0 60px; max-width: 900px; }
+      .pm-ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .pm-ps-card { padding: 40px; border-radius: 28px; border: 1px solid var(--line); background: #fff; }
+      .pm-ps-problem { background: #fff; }
+      .pm-ps-solution { background: var(--ink); color: var(--paper); border-color: transparent; }
+      .pm-ps-label { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 22px; background: rgba(6,46,35,0.06); color: var(--ink); }
+      .pm-ps-solution .pm-ps-label { background: rgba(52,211,153,0.16); color: var(--mint); }
+      .pm-ps-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
+      .pm-ps-card li { display: flex; gap: 14px; align-items: flex-start; font-size: 16px; line-height: 1.5; }
+      .pm-ps-problem li span { flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; background: rgba(6,46,35,0.06); color: rgba(6,46,35,0.6); font-size: 12px; font-weight: 600; display: grid; place-items: center; margin-top: 2px; }
+      .pm-ps-solution li svg { color: var(--mint); flex-shrink: 0; margin-top: 4px; }
+      @media (max-width: 780px) { .pm-ps-grid { grid-template-columns: 1fr; } .pm-ps-card { padding: 28px; } }
+
+      .pm-features { padding: 140px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .pm-sec-head { max-width: 780px; margin-bottom: 70px; }
+      .pm-sec-kicker { display: inline-block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: 18px; }
+      .pm-sec-kicker-light { color: var(--mint); }
+      .pm-sec-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 20px; }
+      .pm-sec-sub { font-size: 17px; color: rgba(6,46,35,0.6); line-height: 1.55; max-width: 620px; }
+      .pm-feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .pm-feat-card { position: relative; padding: 32px 28px 36px; border-radius: 24px; border: 1px solid var(--line); background: #fbfcfb; overflow: hidden; transition: .4s cubic-bezier(.6,.05,.2,1); cursor: pointer; }
+      .pm-feat-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(5,150,105,0.08), transparent 60%); opacity: 0; transition: .4s; }
+      .pm-feat-card:hover { transform: translateY(-6px); border-color: rgba(5,150,105,0.3); box-shadow: 0 30px 60px -30px rgba(5,150,105,0.35); }
+      .pm-feat-card:hover::before { opacity: 1; }
+      .pm-feat-card > * { position: relative; }
+      .pm-feat-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--ink); color: var(--paper); display: grid; place-items: center; margin-bottom: 20px; }
+      .pm-feat-icon svg { width: 22px; height: 22px; }
+      .pm-feat-tag { display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--primary); margin-bottom: 10px; }
+      .pm-feat-card h3 { margin: 0 0 10px; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+      .pm-feat-card p { margin: 0; font-size: 14.5px; line-height: 1.55; color: rgba(6,46,35,0.6); }
+      .pm-feat-arrow { position: absolute; top: 28px; right: 28px; width: 36px; height: 36px; border-radius: 999px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink); transition: .3s; }
+      .pm-feat-card:hover .pm-feat-arrow { background: var(--ink); color: var(--paper); transform: rotate(45deg); }
+      @media (max-width: 900px) { .pm-feat-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 600px) { .pm-feat-grid { grid-template-columns: 1fr; } }
+
+      .pm-split { padding: 140px 0; }
+      .pm-split-panel { background: #fff; border: 1px solid var(--line); border-radius: 28px; padding: 8px; box-shadow: 0 40px 80px -40px rgba(6,46,35,0.2); }
+      .pm-split-tabs { display: flex; gap: 4px; padding: 6px; background: rgba(6,46,35,0.04); border-radius: 22px; width: fit-content; margin-bottom: 8px; }
+      .pm-split-tab { padding: 10px 20px; background: transparent; border: none; border-radius: 16px; font-size: 14px; font-weight: 500; color: rgba(6,46,35,0.6); cursor: pointer; font-family: inherit; transition: .3s; }
+      .pm-split-tab:hover { color: var(--ink); }
+      .pm-split-tab.is-active { background: #fff; color: var(--ink); box-shadow: 0 6px 16px -8px rgba(6,46,35,0.2); }
+      .pm-split-body { padding: 32px 28px; }
+      .pm-split-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+      .pm-split-head em { display: block; font-style: normal; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: rgba(6,46,35,0.5); }
+      .pm-split-head strong { display: block; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 42px; margin-top: 4px; }
+      .pm-split-meta { font-size: 13px; color: rgba(6,46,35,0.55); }
+      .pm-split-meta span { color: var(--primary); font-weight: 600; }
+      .pm-split-list { display: flex; flex-direction: column; gap: 14px; }
+      .pm-split-row { display: grid; grid-template-columns: 34px 90px 1fr 80px; align-items: center; gap: 16px; }
+      .pm-split-avatar { width: 34px; height: 34px; border-radius: 999px; color: #fff; font-weight: 600; font-size: 13px; display: grid; place-items: center; }
+      .pm-split-name { font-size: 14.5px; font-weight: 500; }
+      .pm-split-bar { height: 10px; background: rgba(6,46,35,0.05); border-radius: 999px; overflow: hidden; }
+      .pm-split-fill { height: 100%; border-radius: 999px; transition: width .6s cubic-bezier(.6,.05,.2,1); }
+      .pm-split-amt { text-align: right; font-size: 15px; font-weight: 600; }
+
+      .pm-stats { padding: 140px 0; background: var(--ink); color: var(--paper); }
+      .pm-stats-head { max-width: 820px; margin-bottom: 70px; }
+      .pm-stats-title { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 60px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; color: var(--paper); }
+      .pm-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+      .pm-stat { padding-top: 28px; border-top: 1px solid rgba(255,255,255,0.14); }
+      .pm-stat-n { font-family: 'Instrument Serif', serif; font-size: clamp(52px, 6vw, 84px); line-height: 1; color: var(--mint); letter-spacing: -0.03em; }
+      .pm-stat-t { margin-top: 18px; font-size: 15px; font-weight: 600; color: var(--paper); }
+      .pm-stat-d { margin-top: 6px; font-size: 13.5px; line-height: 1.5; color: rgba(255,255,255,0.55); }
+      @media (max-width: 900px) { .pm-stats-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 500px) { .pm-stats-grid { grid-template-columns: 1fr; } }
+
+      .pm-cta { padding: 60px 0 140px; }
+      .pm-cta-card { position: relative; overflow: hidden; padding: clamp(48px, 8vw, 100px) clamp(24px, 5vw, 80px); border-radius: 40px; background: radial-gradient(ellipse at top right, rgba(52,211,153,0.4), transparent 60%), linear-gradient(160deg, var(--ink), #0a4030); color: var(--paper); }
+      .pm-cta-orn { position: absolute; width: 500px; height: 500px; border-radius: 999px; background: radial-gradient(circle, var(--mint), transparent 70%); opacity: 0.2; top: -180px; right: -120px; }
+      .pm-cta-kick { display: inline-block; padding: 7px 14px; background: rgba(52,211,153,0.16); color: var(--mint); border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 24px; }
+      .pm-cta-title { position: relative; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(36px, 5vw, 68px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 20px; max-width: 800px; }
+      .pm-cta-sub { position: relative; font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.55; max-width: 560px; }
+      .pm-cta-actions { position: relative; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+
+      .pm-footer { padding: 80px 0 30px; background: #fff; border-top: 1px solid var(--line); }
+      .pm-footer-inner { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; padding-bottom: 60px; }
+      .pm-footer-brand { display: flex; flex-direction: column; gap: 12px; }
+      .pm-footer-brand > span { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+      .pm-footer-brand em { font-style: normal; color: var(--primary); font-weight: 400; }
+      .pm-footer-brand p { margin: 8px 0 0; font-size: 14px; color: rgba(6,46,35,0.55); max-width: 260px; }
+      .pm-footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+      .pm-footer-cols h5 { margin: 0 0 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: rgba(6,46,35,0.5); font-weight: 600; }
+      .pm-footer-cols a { display: block; padding: 5px 0; font-size: 14px; color: var(--ink); text-decoration: none; transition: color .2s; }
+      .pm-footer-cols a:hover { color: var(--primary); }
+      .pm-footer-base { display: flex; justify-content: space-between; padding: 24px 20px 0; max-width: 1240px; margin: 0 auto; border-top: 1px solid var(--line); font-size: 13px; color: rgba(6,46,35,0.5); }
+      @media (max-width: 760px) { .pm-footer-inner { grid-template-columns: 1fr; } .pm-footer-base { flex-direction: column; gap: 8px; text-align: center; justify-content: center; } }
+
+      .pm-simplify { padding: 140px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .pm-sec-title em { font-style: italic; color: var(--primary); }
+      .pm-simp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0 40px; }
+      .pm-simp-stat { padding: 22px 24px; border: 1px solid var(--line); border-radius: 20px; background: #fbfcfb; }
+      .pm-simp-stat strong { font-family: 'Instrument Serif', serif; font-size: 40px; line-height: 1; color: var(--primary); display: block; }
+      .pm-simp-stat span { display: block; margin-top: 8px; font-size: 13px; color: rgba(6,46,35,0.6); }
+      .pm-simp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .pm-simp-card { padding: 28px; border-radius: 24px; border: 1px solid var(--line); background: #fbfcfb; }
+      .pm-simp-card-after { background: var(--ink); color: var(--paper); border-color: transparent; }
+      .pm-simp-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .pm-simp-card header strong { font-size: 14px; opacity: .75; font-weight: 500; }
+      .pm-simp-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; background: rgba(6,46,35,0.08); color: var(--ink); }
+      .pm-simp-pill-good { background: rgba(52,211,153,0.18); color: var(--mint); }
+      .pm-simp-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+      .pm-simp-card li { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff; border-radius: 14px; font-size: 14px; }
+      .pm-simp-card-after li { background: rgba(255,255,255,0.06); }
+      .pm-simp-card li em { font-style: normal; margin-left: auto; font-weight: 600; }
+      @media (max-width: 780px) { .pm-simp-grid { grid-template-columns: 1fr; } .pm-simp-stats { grid-template-columns: 1fr; } }
+
+      .pm-analytics { padding: 140px 0; }
+      .pm-anal-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+      .pm-anal-card { padding: 28px; border-radius: 24px; border: 1px solid var(--line); background: #fff; }
+      .pm-anal-card header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+      .pm-anal-card header em { font-style: normal; font-size: 12px; color: rgba(6,46,35,0.55); text-transform: uppercase; letter-spacing: .1em; }
+      .pm-anal-card header strong { display: block; font-size: 18px; margin-top: 4px; font-weight: 600; }
+      .pm-anal-export { padding: 8px 14px; border-radius: 999px; background: rgba(6,46,35,0.05); border: 1px solid var(--line); font-size: 12.5px; cursor: pointer; font-family: inherit; color: var(--ink); }
+      .pm-donut-wrap { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center; }
+      .pm-donut { width: 220px; height: 220px; }
+      .pm-donut-lbl { font-size: 11px; fill: rgba(6,46,35,0.55); text-transform: uppercase; letter-spacing: .1em; }
+      .pm-donut-val { font-family: 'Instrument Serif', serif; font-size: 22px; fill: var(--ink); }
+      .pm-anal-legend { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+      .pm-anal-legend li { display: flex; align-items: center; gap: 10px; font-size: 13.5px; }
+      .pm-anal-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+      .pm-anal-legend em { margin-left: auto; font-style: normal; color: rgba(6,46,35,0.55); font-variant-numeric: tabular-nums; }
+      .pm-anal-card footer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+      .pm-anal-card footer span { font-size: 11.5px; color: rgba(6,46,35,0.55); text-transform: uppercase; letter-spacing: .08em; }
+      .pm-anal-card footer strong { display: block; margin-top: 4px; font-size: 16px; font-weight: 600; }
+      .pm-up { color: var(--primary); }
+      .pm-anal-list h4 { margin: 0 0 16px; font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; letter-spacing: -0.01em; }
+      .pm-anal-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+      .pm-anal-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; line-height: 1.5; color: rgba(6,46,35,0.75); }
+      .pm-anal-list li svg { color: var(--primary); margin-top: 3px; flex-shrink: 0; }
+      @media (max-width: 900px) { .pm-anal-grid { grid-template-columns: 1fr; } .pm-donut-wrap { grid-template-columns: 1fr; justify-items: center; } }
+
+      .pm-how { padding: 140px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .pm-how-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: pm-step; }
+      .pm-how-step { padding: 28px 24px; border: 1px solid var(--line); border-radius: 22px; background: #fbfcfb; transition: .3s cubic-bezier(.6,.05,.2,1); }
+      .pm-how-step:hover { transform: translateY(-4px); border-color: rgba(5,150,105,0.35); background: #fff; }
+      .pm-how-n { display: inline-block; font-family: 'Instrument Serif', serif; font-size: 34px; color: var(--primary); line-height: 1; margin-bottom: 14px; }
+      .pm-how-step strong { display: block; font-size: 17px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+      .pm-how-step p { margin: 0; font-size: 14px; color: rgba(6,46,35,0.6); line-height: 1.55; }
+      @media (max-width: 900px) { .pm-how-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 560px) { .pm-how-grid { grid-template-columns: 1fr; } }
+
+      .pm-cta-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 40px; }
+      .pm-cta-chip { padding: 16px 18px; border-radius: 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); }
+      .pm-cta-chip strong { display: block; font-size: 14px; font-weight: 600; color: var(--paper); }
+      .pm-cta-chip span { display: block; margin-top: 4px; font-size: 12.5px; color: rgba(245,247,244,0.6); }
+      @media (max-width: 780px) { .pm-cta-chips { grid-template-columns: 1fr; } }
+    `}</style>
   );
 }
