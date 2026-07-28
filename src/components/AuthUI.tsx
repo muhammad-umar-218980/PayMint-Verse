@@ -129,14 +129,14 @@ export default function AuthUI({ mode }: AuthUIProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-white flex justify-center items-center font-sans relative overflow-hidden py-0">
+    <div className="min-h-screen bg-[#F5F7F4] text-[#062E23] flex justify-center items-center font-sans relative overflow-hidden py-0">
       
       {/* Background glow for the app theme */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-violet-600/20 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#059669]/15 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#34D399]/15 blur-[120px] rounded-full pointer-events-none" />
 
       {/* Main Container */}
-      <div className={`relative bg-[#151f30] border border-violet-900/40 rounded-[2rem] shadow-2xl overflow-hidden w-full max-w-[900px] min-h-[480px] transition-all duration-700 z-10 mx-4`}>
+      <div className={`relative bg-white border border-[#062E23]/10 rounded-[2rem] shadow-[0_40px_80px_-30px_rgba(6,46,35,0.15)] overflow-hidden w-full max-w-[900px] min-h-[480px] transition-all duration-700 z-10 mx-4`}>
         
         {/* Sign Up Container */}
         <div 
@@ -146,25 +146,25 @@ export default function AuthUI({ mode }: AuthUIProps) {
               : "opacity-0 z-10 pointer-events-none"
           }`}
         >
-          <div className="bg-[#151f30] flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
+          <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
             
             <div className="flex items-center gap-3 mb-2">
-              <img src="/green logo.png" alt="Logo" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]" />
-              <span className="font-space text-3xl font-bold text-white">
-                Pay<span className="text-violet-400">Mint</span> Verse
+              <img src="/green logo.png" alt="Logo" className="w-12 h-12" />
+              <span className="font-space text-3xl font-bold text-[#062E23]">
+                Pay<span className="text-[#059669]">Mint</span> Verse
               </span>
             </div>
 
-            <h1 className="font-space font-bold text-xl mb-3 text-white tracking-tight">Create your account</h1>
+            <h1 className="font-space font-bold text-xl mb-3 text-[#062E23] tracking-tight">Create your account</h1>
             
             {error && isRightPanelActive && (
-              <div className="w-full max-w-[320px] bg-red-500/10 border border-red-500/50 text-red-400 text-xs px-3 py-2 rounded-lg mb-3">
+              <div className="w-full max-w-[320px] bg-red-500/10 border border-red-500/30 text-red-600 text-xs px-3 py-2 rounded-lg mb-3">
                 {error}
               </div>
             )}
             
             {successMsg && isRightPanelActive && (
-              <div className="w-full max-w-[320px] bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-xs px-3 py-2 rounded-lg mb-3">
+              <div className="w-full max-w-[320px] bg-emerald-500/10 border border-emerald-500/30 text-[#059669] text-xs px-3 py-2 rounded-lg mb-3">
                 {successMsg}
               </div>
             )}
@@ -175,7 +175,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 placeholder="Full Name" 
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
+                className="w-full bg-[#F5F7F4] border border-[#062E23]/10 px-4 py-2.5 rounded-xl mb-2 text-[#062E23] placeholder-slate-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all font-medium text-[13px]" 
                 required
               />
               <input 
@@ -183,7 +183,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 placeholder="Email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
+                className="w-full bg-[#F5F7F4] border border-[#062E23]/10 px-4 py-2.5 rounded-xl mb-2 text-[#062E23] placeholder-slate-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all font-medium text-[13px]" 
                 required
               />
               <div className="relative w-full mb-2">
@@ -192,13 +192,13 @@ export default function AuthUI({ mode }: AuthUIProps) {
                   placeholder="Password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
+                  className="w-full bg-[#F5F7F4] border border-[#062E23]/10 px-4 py-2.5 rounded-xl text-[#062E23] placeholder-slate-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all font-medium text-[13px]" 
                   required
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowSignupPassword(!showSignupPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#062E23] transition-colors"
                 >
                   {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -209,13 +209,13 @@ export default function AuthUI({ mode }: AuthUIProps) {
                   placeholder="Confirm Password" 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
+                  className="w-full bg-[#F5F7F4] border border-[#062E23]/10 px-4 py-2.5 rounded-xl text-[#062E23] placeholder-slate-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all font-medium text-[13px]" 
                   required
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#062E23] transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -224,21 +224,21 @@ export default function AuthUI({ mode }: AuthUIProps) {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="rounded-xl border border-violet-700 bg-violet-700 text-white font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)] disabled:opacity-50 disabled:pointer-events-none"
+                className="rounded-xl border border-[#062E23] bg-[#062E23] text-[#F5F7F4] font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-[#059669] hover:border-[#059669] transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(6,46,35,0.2)] disabled:opacity-50 disabled:pointer-events-none"
               >
                 {loading ? 'Creating...' : 'Create Account'}
               </button>
 
               <div className="flex items-center w-full my-3 opacity-60">
-                <div className="flex-1 border-t border-white/10"></div>
-                <span className="px-3 text-xs text-slate-400 font-medium">OR</span>
-                <div className="flex-1 border-t border-white/10"></div>
+                <div className="flex-1 border-t border-[#062E23]/10"></div>
+                <span className="px-3 text-xs text-[#062E23]/60 font-medium">OR</span>
+                <div className="flex-1 border-t border-[#062E23]/10"></div>
               </div>
 
               <button 
                 type="button" 
                 onClick={handleGoogleAuth}
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1120] text-white font-semibold text-[13px] w-full py-2.5 hover:bg-white/5 transition-all active:scale-[0.98]"
+                className="flex items-center justify-center gap-2 rounded-xl border border-[#062E23]/15 bg-white text-[#062E23] font-semibold text-[13px] w-full py-2.5 hover:bg-slate-50 transition-all active:scale-[0.98]"
               >
                 <GoogleIcon className="w-4 h-4" />
                 Continue with Google
@@ -255,20 +255,20 @@ export default function AuthUI({ mode }: AuthUIProps) {
               : "opacity-100"
           }`}
         >
-          <div className="bg-[#151f30] flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
+          <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
             
             <div className="flex items-center gap-3 mb-2">
-              <img src="/green logo.png" alt="Logo" className="w-12 h-12 drop-shadow-[0_0_10px_rgba(124,58,237,0.4)]" />
-              <span className="font-space text-3xl font-bold text-white">
-                Pay<span className="text-violet-400">Mint</span> Verse
+              <img src="/green logo.png" alt="Logo" className="w-12 h-12" />
+              <span className="font-space text-3xl font-bold text-[#062E23]">
+                Pay<span className="text-[#059669]">Mint</span> Verse
               </span>
             </div>
 
-            <h1 className="font-space font-bold text-xl text-white tracking-tight mb-1">Login</h1>
-            <p className="text-[12px] text-slate-400 mb-4 font-medium">Split expenses with friends effortlessly</p>
+            <h1 className="font-space font-bold text-xl text-[#062E23] tracking-tight mb-1">Login</h1>
+            <p className="text-[12px] text-[#062E23]/60 mb-4 font-medium">Split expenses with friends effortlessly</p>
             
             {error && !isRightPanelActive && (
-              <div className="w-full max-w-[320px] bg-red-500/10 border border-red-500/50 text-red-400 text-xs px-3 py-2 rounded-lg mb-3">
+              <div className="w-full max-w-[320px] bg-red-500/10 border border-red-500/30 text-red-600 text-xs px-3 py-2 rounded-lg mb-3">
                 {error}
               </div>
             )}
@@ -279,7 +279,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 placeholder="Email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl mb-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
+                className="w-full bg-[#F5F7F4] border border-[#062E23]/10 px-4 py-2.5 rounded-xl mb-3 text-[#062E23] placeholder-slate-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all font-medium text-[13px]" 
                 required
               />
               
@@ -289,20 +289,20 @@ export default function AuthUI({ mode }: AuthUIProps) {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)} 
-                  className="w-full bg-[#0B1120] border border-white/10 px-4 py-2.5 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-[13px]" 
+                  className="w-full bg-[#F5F7F4] border border-[#062E23]/10 px-4 py-2.5 rounded-xl text-[#062E23] placeholder-slate-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all font-medium text-[13px]" 
                   required
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowLoginPassword(!showLoginPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#062E23] transition-colors"
                 >
                   {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
 
               <div className="w-full text-right mb-4">
-                <a href="#" className="text-[11px] text-slate-400 hover:text-violet-400 transition-colors font-medium">
+                <a href="#" className="text-[11px] text-[#062E23]/60 hover:text-[#059669] transition-colors font-medium">
                   Forgot Password?
                 </a>
               </div>
@@ -310,21 +310,21 @@ export default function AuthUI({ mode }: AuthUIProps) {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="rounded-xl border border-violet-700 bg-violet-700 text-white font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)] disabled:opacity-50 disabled:pointer-events-none"
+                className="rounded-xl border border-[#062E23] bg-[#062E23] text-[#F5F7F4] font-bold text-[12px] w-full py-2.5 uppercase tracking-wide hover:bg-[#059669] hover:border-[#059669] transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(6,46,35,0.2)] disabled:opacity-50 disabled:pointer-events-none"
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
 
               <div className="flex items-center w-full my-4 opacity-60">
-                <div className="flex-1 border-t border-white/10"></div>
-                <span className="px-3 text-xs text-slate-400 font-medium">OR</span>
-                <div className="flex-1 border-t border-white/10"></div>
+                <div className="flex-1 border-t border-[#062E23]/10"></div>
+                <span className="px-3 text-xs text-[#062E23]/60 font-medium">OR</span>
+                <div className="flex-1 border-t border-[#062E23]/10"></div>
               </div>
 
               <button 
                 type="button" 
                 onClick={handleGoogleAuth}
-                className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[#0B1120] text-white font-semibold text-[13px] w-full py-2.5 hover:bg-white/5 transition-all active:scale-[0.98]"
+                className="flex items-center justify-center gap-2 rounded-xl border border-[#062E23]/15 bg-white text-[#062E23] font-semibold text-[13px] w-full py-2.5 hover:bg-slate-50 transition-all active:scale-[0.98]"
               >
                 <GoogleIcon className="w-4 h-4" />
                 Continue with Google
@@ -341,12 +341,12 @@ export default function AuthUI({ mode }: AuthUIProps) {
         >
           {/* Overlay Background */}
           <div 
-            className={`bg-gradient-to-br from-violet-600 via-indigo-600 to-indigo-800 relative -left-full h-full w-[200%] transform transition-transform duration-700 ease-in-out ${
+            className={`bg-gradient-to-br from-[#062E23] via-[#059669] to-[#047857] relative -left-full h-full w-[200%] transform transition-transform duration-700 ease-in-out ${
               isRightPanelActive ? "translate-x-1/2" : "translate-x-0"
             }`}
           >
             {/* Background patterns */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-15 pointer-events-none" />
             
             {/* Overlay Left (Shown when signing up) */}
             <div 
@@ -357,7 +357,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
               <h1 className="font-space font-bold text-3xl mb-3 text-white tracking-tight leading-tight">
                 Welcome Back!
               </h1>
-              <p className="text-white/80 text-[13px] mb-6 leading-[1.6] font-medium max-w-[250px]">
+              <p className="text-white/90 text-[13px] mb-6 leading-[1.6] font-medium max-w-[250px]">
                 Already have an account? Login to keep connected with your groups.
               </p>
               <button 
@@ -381,7 +381,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
               <h1 className="font-space font-bold text-3xl mb-3 text-white tracking-tight leading-tight">
                 Hello, Friend!
               </h1>
-              <p className="text-white/80 text-[13px] mb-6 leading-[1.6] font-medium max-w-[250px]">
+              <p className="text-white/90 text-[13px] mb-6 leading-[1.6] font-medium max-w-[250px]">
                 Don't have an account? Sign up to start tracking shared expenses with us.
               </p>
               <button 
@@ -401,7 +401,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
       
       <Link 
         href="/" 
-        className="absolute top-6 left-6 text-slate-400 hover:text-white transition-colors text-[14px] font-medium flex items-center gap-2 group z-50"
+        className="absolute top-6 left-6 text-[#062E23]/60 hover:text-[#062E23] transition-colors text-[14px] font-medium flex items-center gap-2 group z-50"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         Back to Home
