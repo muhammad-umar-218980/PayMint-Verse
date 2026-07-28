@@ -341,12 +341,12 @@ export default function AuthUI({ mode }: AuthUIProps) {
         >
           {/* Overlay Background */}
           <div 
-            className={`bg-gradient-to-br from-[#062E23] via-[#059669] to-[#047857] relative -left-full h-full w-[200%] transform transition-transform duration-700 ease-in-out ${
+            className={`bg-gradient-to-br from-[#0C4F3C] via-[#059669] to-[#047857] relative -left-full h-full w-[200%] transform transition-transform duration-700 ease-in-out ${
               isRightPanelActive ? "translate-x-1/2" : "translate-x-0"
             }`}
           >
             {/* Background patterns */}
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-15 pointer-events-none" />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-25 pointer-events-none mix-blend-overlay" />
             
             {/* Overlay Left (Shown when signing up) */}
             <div 
