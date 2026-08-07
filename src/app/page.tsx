@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -150,30 +151,33 @@ export default function Homepage() {
 }
 
 function Nav() {
-  const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
-    let last = 0;
-    const onScroll = () => {
-      const y = window.scrollY;
-      setScrolled(y > 30);
-      setHidden(y > last && y > 140);
-      last = y;
-    };
+    const onScroll = () => setScrolled(window.scrollY > 30);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const closeMobile = () => setMobileOpen(false);
+
   return (
+    <>
     <nav
-      className={`pm-nav ${hidden ? "is-hidden" : ""} ${scrolled ? "is-scrolled" : ""}`}
+      className={`pm-nav ${scrolled ? "is-scrolled" : ""}`}
       data-cursor-text=""
     >
       <div className="pm-nav-inner">
         <Link href="/" className="pm-logo" data-cursor-text="home">
-          <LogoMark />
-          <span>PayMint<em>Verse</em></span>
+          <img src="/green logo.png" alt="PayMint" className="pm-logo-img" />
+          <span className="pm-brand-text">
+            <span className="pm-pay">Pay</span>
+            <span className="pm-mint">Mint</span>
+            <span className="pm-verse">Verse</span>
+          </span>
         </Link>
 
         <div className="pm-nav-links">
@@ -202,31 +206,50 @@ function Nav() {
               ))}
             </div>
           </div>
-          <a href="#pricing" className="pm-navlink"><span>Pricing</span></a>
         </div>
 
-        <a href="#cta" className="pm-cta-btn" data-cursor-text="get started">
-          <span>Get started</span>
-          <ArrowRight size={16} />
-        </a>
+        <div className="pm-nav-actions">
+          <Link href="/auth/login" className="pm-login-btn">Login</Link>
+          <Link href="/auth/signup" className="pm-cta-btn" data-cursor-text="get started">
+            <span>Get started</span>
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+
+        <button
+          className={`pm-hamburger ${mobileOpen ? "is-open" : ""}`}
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
+          <span /><span /><span />
+        </button>
       </div>
     </nav>
-  );
-}
 
-function LogoMark() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="9" fill={EMERALD.ink} />
-      <path d="M8 22V10h6.5a4.5 4.5 0 010 9H12v3H8z" fill={EMERALD.mint} />
-      <circle cx="22" cy="12" r="2.5" fill={EMERALD.light} />
-    </svg>
-  );
+    {mounted && createPortal(
+      <div className={`pm-mobile-menu ${mobileOpen ? "is-open" : ""}`}>
+        <div className="pm-mobile-overlay" onClick={closeMobile} />
+        <div className="pm-mobile-panel">
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}>Features</a>
+          <a href="#how" className="pm-mobile-link" onClick={closeMobile}>How it works</a>
+          <div className="pm-mobile-sep" />
+          <span className="pm-mobile-label">Product</span>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Scale size={16} /> Smart splitting</a>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Zap size={16} /> Debt simplification</a>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><BarChart3 size={16} /> Analytics</a>
+          <a href="#features" className="pm-mobile-link" onClick={closeMobile}><Users size={16} /> Groups</a>
+          <div className="pm-mobile-auth-sep" />
+          <Link href="/auth/login" className="pm-mobile-login" onClick={closeMobile}>Login</Link>
+          <Link href="/auth/signup" className="pm-mobile-signup" onClick={closeMobile}>Get started</Link>
+        </div>
+      </div>,
+      document.body,
+    )}
+  </>);
 }
 
 function Hero() {
   const [playing, setPlaying] = useState(false);
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <section className="pm-hero">
@@ -245,17 +268,6 @@ function Hero() {
           <span className="pm-h1-line" data-split>Stop chasing people</span>
           <span className="pm-h1-line pm-h1-italic-row">
             <span data-split>for money.</span>
-            <button
-              className={`pm-video-inline ${expanded ? "is-expanded" : ""}`}
-              onClick={() => setExpanded((v) => !v)}
-              data-cursor-text={expanded ? "close" : "watch"}
-              aria-label="Product preview"
-            >
-              <MiniAppPreview />
-              <span className="pm-video-play">
-                {playing ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
-              </span>
-            </button>
             <span data-split>Start</span>
           </span>
           <span className="pm-h1-line pm-h1-italic" data-split>settling.</span>
@@ -287,23 +299,6 @@ function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function MiniAppPreview() {
-  return (
-    <div className="pm-mini-preview">
-      <div className="pm-mini-row">
-        <div className="pm-mini-avatar" style={{ background: EMERALD.primary }}>M</div>
-        <div className="pm-mini-bar" />
-        <div className="pm-mini-amt">$42</div>
-      </div>
-      <div className="pm-mini-row">
-        <div className="pm-mini-avatar" style={{ background: EMERALD.mint }}>A</div>
-        <div className="pm-mini-bar" style={{ width: "60%" }} />
-        <div className="pm-mini-amt">$28</div>
-      </div>
-    </div>
   );
 }
 
@@ -813,8 +808,12 @@ function Footer() {
     <footer className="pm-footer">
       <div className="pm-container pm-footer-inner">
         <div className="pm-footer-brand">
-          <LogoMark />
-          <span>PayMint<em>Verse</em></span>
+          <img src="/green logo.png" alt="PayMint" className="pm-logo-img" />
+          <span className="pm-brand-text">
+            <span className="pm-pay">Pay</span>
+            <span className="pm-mint">Mint</span>
+            <span className="pm-verse">Verse</span>
+          </span>
           <p>The calm layer on top of shared money.</p>
         </div>
         <div className="pm-footer-cols">
@@ -849,7 +848,7 @@ function Footer() {
 function StyleTag() {
   return (
     <style>{`
-      .pm-root {
+      :root {
         --ink: ${EMERALD.ink};
         --primary: ${EMERALD.primary};
         --secondary: ${EMERALD.secondary};
@@ -857,7 +856,11 @@ function StyleTag() {
         --light: ${EMERALD.light};
         --paper: ${EMERALD.paper};
         --line: rgba(6,46,35,0.09);
+      }
+      .pm-root, .pm-mobile-menu {
         font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      .pm-root {
         color: var(--ink);
         background: var(--paper);
         overflow-x: hidden;
@@ -865,19 +868,23 @@ function StyleTag() {
       .pm-root * { box-sizing: border-box; }
       .pm-container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px); }
 
-      .pm-nav { position: fixed; top: 14px; left: 0; right: 0; z-index: 100;
+      .pm-nav { position: fixed; top: 14px; left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); z-index: 100;
         transition: transform .5s cubic-bezier(.6,.05,.2,1), top .3s; }
       .pm-nav.is-hidden { transform: translateY(-140%); }
       .pm-nav.is-scrolled { top: 10px; }
       .pm-nav-inner {
-        display: flex; align-items: center; justify-content: space-between; gap: 24px;
-        max-width: 1180px; margin: 0 auto; padding: 10px 14px 10px 22px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        max-width: 1180px; margin: 0 auto; padding: 10px 12px 10px 18px;
         background: rgba(255,255,255,0.78); backdrop-filter: blur(18px) saturate(1.4);
         border: 1px solid rgba(6,46,35,0.08); border-radius: 999px;
         box-shadow: 0 10px 30px -18px rgba(6,46,35,0.25);
       }
-      .pm-logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
-      .pm-logo em { font-style: normal; font-weight: 400; color: var(--primary); }
+      .pm-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+      .pm-logo-img { height: 28px; width: auto; }
+      .pm-brand-text { display: flex; align-items: center; gap: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+      .pm-pay { color: var(--ink); }
+      .pm-mint { color: var(--primary); }
+      .pm-verse { color: var(--ink); }
       .pm-nav-links { display: flex; align-items: center; gap: 6px; }
       .pm-navlink { position: relative; padding: 8px 14px; font-size: 14px; color: var(--ink); text-decoration: none; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
       .pm-navlink > span { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 4px; }
@@ -891,9 +898,32 @@ function StyleTag() {
       .pm-drop-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(5,150,105,0.1); color: var(--primary); display: grid; place-items: center; }
       .pm-drop-item strong { display: block; font-size: 13.5px; font-weight: 600; }
       .pm-drop-item em { display: block; font-style: normal; font-size: 12px; color: rgba(6,46,35,0.55); margin-top: 2px; }
+      .pm-nav-actions { display: flex; align-items: center; gap: 8px; }
+      .pm-login-btn { display: inline-flex; align-items: center; padding: 8px 16px; font-size: 14px; font-weight: 500; color: var(--ink); border-radius: 999px; text-decoration: none; transition: background .25s, transform .3s; }
+      .pm-login-btn:hover { background: rgba(6,46,35,0.06); transform: translateY(-1px); }
       .pm-cta-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px 10px 20px; background: var(--ink); color: var(--paper); border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 500; transition: transform .3s, background .3s; }
       .pm-cta-btn:hover { transform: translateY(-1px); background: var(--primary); }
-      @media (max-width: 820px) { .pm-nav-links { display: none; } }
+      .pm-hamburger { display: none; flex-direction: column; gap: 4px; padding: 8px; background: none; border: none; cursor: pointer; }
+      .pm-hamburger span { display: block; width: 20px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform .3s, opacity .3s; }
+      .pm-hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+      .pm-hamburger.is-open span:nth-child(2) { opacity: 0; }
+      .pm-hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+      .pm-mobile-menu { position: fixed; inset: 0; z-index: 101; opacity: 0; pointer-events: none; transition: opacity .35s; }
+      .pm-mobile-menu.is-open { opacity: 1; pointer-events: auto; }
+      .pm-mobile-overlay { position: fixed; inset: 0; background: rgba(6,46,35,0.55); }
+      .pm-mobile-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(320px, 80vw); background: #fff; padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 2px; transform: translateX(100%); transition: transform .4s cubic-bezier(.6,.05,.2,1); overflow-y: auto; }
+      .pm-mobile-menu.is-open .pm-mobile-panel { transform: translateX(0); }
+      .pm-mobile-link { display: flex; align-items: center; gap: 10px; padding: 12px 14px; font-size: 15px; font-weight: 500; color: var(--ink); text-decoration: none; border-radius: 14px; transition: background .2s; }
+      .pm-mobile-link:hover { background: rgba(6,46,35,0.05); }
+      .pm-mobile-link svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
+      .pm-mobile-sep { height: 1px; background: var(--line); margin: 6px 14px; }
+      .pm-mobile-label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: rgba(6,46,35,0.5); padding: 8px 14px 4px; }
+      .pm-mobile-auth-sep { height: 1px; background: var(--line); margin: 12px 14px 8px; }
+      .pm-mobile-login { display: block; text-align: center; padding: 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 500; transition: background .2s; }
+      .pm-mobile-login:hover { background: rgba(6,46,35,0.05); }
+      .pm-mobile-signup { display: block; text-align: center; padding: 12px; border-radius: 999px; background: var(--ink); color: var(--paper); text-decoration: none; font-size: 15px; font-weight: 500; transition: background .3s; }
+      .pm-mobile-signup:hover { background: var(--primary); }
+      @media (max-width: 820px) { .pm-nav-links, .pm-nav-actions { display: none; } .pm-hamburger { display: flex; } }
 
       .pm-hero { position: relative; padding: 160px 0 80px; overflow: hidden; }
       .pm-hero-ornaments { position: absolute; inset: 0; pointer-events: none; }
@@ -913,16 +943,7 @@ function StyleTag() {
       .pm-word { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1; padding-bottom: 0.06em; }
       .pm-word-inner { display: inline-block; }
 
-      .pm-video-inline { position: relative; display: inline-flex; width: clamp(130px, 15vw, 200px); height: clamp(52px, 6vw, 78px); border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #fff; cursor: pointer; vertical-align: middle; transition: transform .5s cubic-bezier(.6,.05,.2,1), width .5s, height .5s; padding: 0; }
-      .pm-video-inline:hover { transform: translateY(-2px) rotate(-1deg); }
-      .pm-video-inline.is-expanded { width: clamp(230px, 22vw, 320px); height: clamp(88px, 9vw, 120px); }
-      .pm-video-play { position: absolute; bottom: 8px; right: 8px; width: 26px; height: 26px; background: var(--ink); color: var(--paper); border-radius: 999px; display: grid; place-items: center; }
 
-      .pm-mini-preview { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; height: 100%; justify-content: center; }
-      .pm-mini-row { display: flex; align-items: center; gap: 8px; }
-      .pm-mini-avatar { width: 22px; height: 22px; border-radius: 999px; color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; font-family: 'Inter'; }
-      .pm-mini-bar { flex: 1; height: 6px; border-radius: 999px; background: linear-gradient(90deg, ${EMERALD.primary}, ${EMERALD.mint}); width: 80%; }
-      .pm-mini-amt { font-family: 'Inter'; font-size: 11px; font-weight: 600; color: var(--ink); }
 
       .pm-hero-sub { max-width: 640px; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.55; color: rgba(6,46,35,0.7); }
       .pm-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
