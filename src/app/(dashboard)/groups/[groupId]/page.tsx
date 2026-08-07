@@ -1,17 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { GroupService } from '@/features/groups/services/group.service';
-import Link from 'next/link';
-import { ArrowLeft, Users, Calendar, Receipt } from 'lucide-react';
-import AddMemberModal from '@/features/groups/components/AddMemberModal';
 import { ExpenseService } from '@/features/expenses/services/expense.service';
+import { ExpenseRepository } from '@/features/expenses/repositories/expense.repository';
+import { AnalyticsService } from '@/features/analytics/services/analytics.service';
+import { BalanceService } from '@/features/balances/services/balance.service';
+import AddMemberModal from '@/features/groups/components/AddMemberModal';
 import AddExpenseModal from '@/features/expenses/components/AddExpenseModal';
 import ExpenseList from '@/features/expenses/components/ExpenseList';
 import BalancesCard from '@/features/balances/components/BalancesCard';
-import { AnalyticsService } from '@/features/analytics/services/analytics.service';
 import CategoryPieChart from '@/features/analytics/components/CategoryPieChart';
 import ExportButton from '@/features/analytics/components/ExportButton';
-import { ExpenseRepository } from '@/features/expenses/repositories/expense.repository';
+import ActivityFeed from '@/features/activities/components/ActivityFeed';
 
 export default async function GroupPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
@@ -31,107 +31,92 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
 
   const expenseService = new ExpenseService();
   const members = await expenseService.getGroupMembers(groupId);
-  
-  // Create a map for easy lookup
+
   const membersMap = members.reduce((acc, member) => {
     acc[member.user_id] = member.profile?.full_name || member.profile?.email || 'Unknown';
     return acc;
   }, {} as Record<string, string>);
 
-  const analyticsService = new AnalyticsService();
-  const categoryData = await analyticsService.getCategoryBreakdown(groupId);
-
   const expenseRepo = new ExpenseRepository();
   const expenses = await expenseRepo.getExpensesForGroup(groupId);
 
-  return (
-    <div className="px-6 lg:px-10 py-8 lg:pt-10 pt-[80px]">
-      {/* Back Link */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors mb-8"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
-      </Link>
+  const balanceService = new BalanceService();
+  const transactions = await balanceService.getSimplifiedBalances(groupId);
 
-      {/* Group Header Card */}
-      <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-8 mb-8">
-        <div className="flex items-start gap-5">
-          <div className="w-14 h-14 rounded-xl bg-violet-900/30 border border-violet-700/40 flex items-center justify-center shrink-0">
-            <Users className="w-7 h-7 text-violet-400" />
-          </div>
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
-              <h1 className="font-space text-2xl md:text-3xl font-bold text-white">{group.name}</h1>
-              <AddMemberModal groupId={group.id} />
-            </div>
-            {group.description && (
-              <p className="text-slate-400 text-[15px] leading-relaxed mb-4">{group.description}</p>
-            )}
-            <div className="flex items-center gap-4 text-[12px] text-slate-500">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
-                Created {new Date(group.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" />
-                {members.length} Member{members.length !== 1 ? 's' : ''}
-              </span>
-            </div>
+  const net = transactions.reduce((sum, t) => {
+    if (t.to === user.id) return sum + t.amount;
+    if (t.from === user.id) return sum - t.amount;
+    return sum;
+  }, 0);
+
+  const analyticsService = new AnalyticsService();
+  const categoryData = await analyticsService.getCategoryBreakdown(groupId);
+
+  return (
+    <div className="px-6 lg:px-10 py-8 lg:pt-10 pt-[80px] max-w-[920px] mx-auto">
+      {/* Header — like the landing page mockup */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
+        <div>
+          <h1 className="font-serif text-4xl lg:text-5xl tracking-tight text-ink">{group.name}</h1>
+          {group.description && (
+            <p className="text-slate-500 mt-2 text-[15px] max-w-md leading-relaxed">{group.description}</p>
+          )}
+          <div className="flex items-center gap-2.5 mt-3 text-[13px] text-slate-500">
+            <span className="font-semibold text-ink">{members.length} people</span>
+            <span>·</span>
+            <span>{expenses.length} expense{expenses.length !== 1 ? 's' : ''}</span>
+            <span className="hidden sm:inline">·</span>
+            <span className="hidden sm:inline">
+              Created {new Date(group.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </span>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Expenses */}
-        <div className="lg:col-span-2">
-          {/* Expense Header Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <h2 className="font-space text-xl font-bold text-white">Expenses</h2>
+        <div className="flex flex-col items-start sm:items-end gap-3">
+          <div className="flex items-baseline gap-2">
+            <span className={`text-[11px] uppercase tracking-widest font-bold ${net >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              {net >= 0 ? 'You are owed' : 'You owe'}
+            </span>
+            <span className={`font-serif text-3xl leading-none tracking-tight ${net >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              {net < 0 ? '−' : ''}PKR {Math.abs(net).toLocaleString()}
+            </span>
+          </div>
+          <div className="flex gap-3">
+            <AddMemberModal groupId={group.id} />
             <AddExpenseModal groupId={group.id} members={members} currentUserId={user.id} />
           </div>
-
-          {/* Expenses List */}
-          <div className="bg-[#151f30]/50 border border-violet-900/10 rounded-2xl p-4 md:p-6 min-h-[400px]">
-            <ExpenseList groupId={group.id} membersMap={membersMap} currentUserId={user.id} />
-          </div>
-        </div>
-
-        {/* Right Column: Balances */}
-        <div className="lg:col-span-1">
-          <BalancesCard groupId={group.id} membersMap={membersMap} currentUserId={user.id} />
         </div>
       </div>
 
-      {/* Analytics & Insights Section */}
-      <div className="mt-8 border-t border-white/5 pt-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h2 className="font-space text-xl font-bold text-white">Insights</h2>
-            <p className="text-slate-400 text-sm mt-1">Group spending breakdown and data export.</p>
+      {/* Expense list — compact rows like the mockup */}
+      <div className="bg-white border border-line rounded-[26px] px-4 sm:px-6 py-3 mb-8 shadow-[0_40px_80px_-40px_rgba(6,46,35,0.12)]">
+        <ExpenseList groupId={group.id} membersMap={membersMap} currentUserId={user.id} />
+      </div>
+
+      {/* Settlement — mockup "Simplified settlement" section */}
+      <div className="mb-8">
+        <BalancesCard
+          groupId={group.id}
+          membersMap={membersMap}
+          currentUserId={user.id}
+          initialTransactions={transactions}
+        />
+      </div>
+
+      {/* Insights + Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white border border-line rounded-[26px] p-6 shadow-[0_40px_80px_-40px_rgba(6,46,35,0.12)]">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 className="font-serif text-[22px] tracking-tight text-ink">Spending by Category</h3>
+              <p className="text-xs text-slate-500 mt-1">Group spending breakdown.</p>
+            </div>
+            <ExportButton expenses={expenses} groupName={group.name} />
           </div>
-          <ExportButton expenses={expenses} groupName={group.name} />
+          <CategoryPieChart data={categoryData} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Category Breakdown */}
-          <div className="bg-[#151f30] border border-violet-900/20 rounded-2xl p-6">
-            <h3 className="font-space font-bold text-white mb-6 flex items-center gap-2">
-              Spending by Category
-            </h3>
-            <CategoryPieChart data={categoryData} />
-          </div>
-
-          {/* Reserved for future analytics (e.g. Monthly Trend) */}
-          <div className="bg-[#151f30]/50 border border-violet-900/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-             <div className="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-4">
-                <Receipt className="w-6 h-6 text-slate-500" />
-             </div>
-             <p className="text-slate-400 font-medium mb-1">More insights coming soon</p>
-             <p className="text-slate-500 text-sm">Monthly trends and individual spending habits will appear here.</p>
-          </div>
-        </div>
+        <ActivityFeed currentUserId={user.id} />
       </div>
     </div>
   );

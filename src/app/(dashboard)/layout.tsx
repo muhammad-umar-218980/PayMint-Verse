@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import { GroupService } from '@/features/groups/services/group.service';
 
 export default async function DashboardLayout({
   children,
@@ -14,12 +15,12 @@ export default async function DashboardLayout({
     redirect('/auth/login');
   }
 
+  const groupService = new GroupService();
+  const groups = await groupService.getUserGroups(user.id);
+
   return (
-    <div className="min-h-screen bg-[#0B1120] text-white font-sans flex">
-      <DashboardSidebar user={user} />
-      <main className="flex-1 ml-0 lg:ml-[260px] min-h-screen">
-        {children}
-      </main>
-    </div>
+    <DashboardSidebar user={user} groups={groups}>
+      {children}
+    </DashboardSidebar>
   );
 }

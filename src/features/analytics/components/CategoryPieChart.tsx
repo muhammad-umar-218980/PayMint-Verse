@@ -9,19 +9,20 @@ interface CategoryPieChartProps {
 const CATEGORY_COLORS: Record<string, string> = {
   'Food': '#ec4899', // Pink
   'Transport': '#3b82f6', // Blue
-  'Shopping': '#a855f7', // Purple
+  'Accommodation': '#a855f7', // Purple
+  'Housing': '#10b981', // Emerald (legacy)
   'Entertainment': '#f59e0b', // Amber
-  'Housing': '#10b981', // Emerald
-  'Utilities': '#06b6d4', // Cyan
+  'Shopping': '#06b6d4', // Cyan
+  'Utilities': '#f97316', // Orange
   'Other': '#64748b'  // Slate
 };
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#151f30] border border-white/10 rounded-xl p-3 shadow-xl">
-        <p className="text-white font-medium mb-1">{payload[0].name}</p>
-        <p className="text-violet-400 font-space font-bold">
+      <div className="bg-white border border-line rounded-xl p-3 shadow-xl">
+        <p className="text-ink font-medium mb-1">{payload[0].name}</p>
+        <p className="text-emerald-700 font-serif tracking-tight">
           PKR {payload[0].value.toLocaleString()}
         </p>
       </div>
@@ -62,7 +63,7 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
             verticalAlign="bottom" 
             height={36}
             iconType="circle"
-            formatter={(value) => <span className="text-slate-300 text-xs ml-1">{value}</span>}
+            formatter={(value) => <span className="text-slate-600 text-xs ml-1">{value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>

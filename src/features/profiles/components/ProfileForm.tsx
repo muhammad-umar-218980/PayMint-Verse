@@ -9,6 +9,9 @@ interface ProfileFormProps {
   initialProfile: Profile;
 }
 
+const INPUT_CLASS =
+  'w-full bg-[#F5F7F4] border border-[rgba(6,46,35,0.10)] px-4 py-3 rounded-xl text-ink placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all text-sm';
+
 export default function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState('');
@@ -21,8 +24,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       await updateProfileAction(formData);
       setMessage('Profile updated successfully!');
       setIsSuccess(true);
-    } catch (error: any) {
-      setMessage(error.message || 'Failed to update profile.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to update profile.');
       setIsSuccess(false);
     } finally {
       setIsPending(false);
@@ -35,8 +38,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       {message && (
         <div className={`flex items-center gap-2 p-4 mb-6 rounded-xl text-sm font-medium ${
           isSuccess
-            ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-            : 'bg-red-500/10 border border-red-500/20 text-red-400'
+            ? 'bg-emerald-600/10 border border-emerald-600/20 text-emerald-700'
+            : 'bg-red-50 border border-red-200 text-red-600'
         }`}>
           {isSuccess ? <Check className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
           {message}
@@ -45,24 +48,24 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
 
       <form action={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="full_name" className="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+          <label htmlFor="full_name" className="block text-sm font-medium text-slate-600 mb-2">Full Name</label>
           <input
             type="text"
             id="full_name"
             name="full_name"
             defaultValue={initialProfile.full_name || ''}
-            className="w-full bg-[#0B1120] border border-white/10 px-4 py-3 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all text-sm"
+            className={INPUT_CLASS}
             placeholder="Enter your full name"
           />
         </div>
 
         <div>
-          <label htmlFor="currency" className="block text-sm font-medium text-slate-300 mb-2">Preferred Currency</label>
+          <label htmlFor="currency" className="block text-sm font-medium text-slate-600 mb-2">Preferred Currency</label>
           <select
             id="currency"
             name="currency"
             defaultValue={initialProfile.currency || 'PKR'}
-            className="w-full bg-[#0B1120] border border-white/10 px-4 py-3 rounded-xl text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all text-sm appearance-none"
+            className={`${INPUT_CLASS} appearance-none`}
           >
             <option value="PKR">Pakistani Rupee (PKR)</option>
             <option value="USD">US Dollar (USD)</option>
@@ -72,12 +75,12 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
         </div>
 
         <div>
-          <label htmlFor="timezone" className="block text-sm font-medium text-slate-300 mb-2">Timezone</label>
+          <label htmlFor="timezone" className="block text-sm font-medium text-slate-600 mb-2">Timezone</label>
           <select
             id="timezone"
             name="timezone"
             defaultValue={initialProfile.timezone || 'Asia/Karachi'}
-            className="w-full bg-[#0B1120] border border-white/10 px-4 py-3 rounded-xl text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all text-sm appearance-none"
+            className={`${INPUT_CLASS} appearance-none`}
           >
             <option value="Asia/Karachi">Asia/Karachi (PKT)</option>
             <option value="UTC">UTC</option>
@@ -89,11 +92,11 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white bg-violet-700 hover:bg-violet-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(124,58,237,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-paper bg-ink hover:bg-emerald-600 transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(6,46,35,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full animate-spin" />
               Saving...
             </>
           ) : (
