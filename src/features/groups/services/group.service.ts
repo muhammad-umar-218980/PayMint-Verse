@@ -41,4 +41,12 @@ export class GroupService {
 
     return group as Group;
   }
+
+  async deleteGroup(groupId: string): Promise<boolean> {
+    return groupRepo.deleteGroup(groupId);
+  }
+
+  async leaveGroup(groupId: string, userId: string): Promise<boolean> {
+    return groupRepo.leaveGroup(groupId, userId);
+  }
 }

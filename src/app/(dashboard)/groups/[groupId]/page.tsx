@@ -12,6 +12,7 @@ import BalancesCard from '@/features/balances/components/BalancesCard';
 import CategoryPieChart from '@/features/analytics/components/CategoryPieChart';
 import ExportButton from '@/features/analytics/components/ExportButton';
 import ActivityFeed from '@/features/activities/components/ActivityFeed';
+import GroupActionButton from '@/features/groups/components/GroupActionButton';
 
 export default async function GroupPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
@@ -82,6 +83,11 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
             </span>
           </div>
           <div className="flex gap-3">
+            <GroupActionButton
+              groupId={group.id}
+              groupName={group.name}
+              isOwner={group.created_by === user.id}
+            />
             <AddMemberModal groupId={group.id} />
             <AddExpenseModal groupId={group.id} members={members} currentUserId={user.id} />
           </div>

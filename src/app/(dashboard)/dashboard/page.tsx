@@ -7,6 +7,7 @@ import { AnalyticsService } from '@/features/analytics/services/analytics.servic
 import { ProfileService } from '@/features/profiles/services/profile.service';
 import CreateGroupModal from '@/features/groups/components/CreateGroupModal';
 import GroupCard from '@/features/groups/components/GroupCard';
+import DeleteAllGroupsButton from '@/features/groups/components/DeleteAllGroupsButton';
 import ActivityFeed from '@/features/activities/components/ActivityFeed';
 import CategoryPieChart from '@/features/analytics/components/CategoryPieChart';
 import { Users, TrendingUp, HandCoins, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
@@ -130,15 +131,18 @@ export default async function DashboardPage() {
     <div className="px-6 lg:px-10 py-8 lg:pt-10 pt-[80px] max-w-[1100px] mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-8">
-        <div>
-          <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-600 mb-3">Dashboard</p>
-          <h1 className="font-serif text-4xl lg:text-5xl tracking-tight text-ink">Welcome back, {firstName}</h1>
-          <p className="text-slate-500 text-[15px] mt-2">
-            Here&rsquo;s what&rsquo;s happening across your {groups.length} group{groups.length !== 1 ? 's' : ''}.
-          </p>
+<div>
+            <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-600 mb-3">Dashboard</p>
+            <h1 className="font-serif text-4xl lg:text-5xl tracking-tight text-ink">Welcome back, {firstName}</h1>
+            <p className="text-slate-500 text-[15px] mt-2">
+              Here&rsquo;s what&rsquo;s happening across your {groups.length} group{groups.length !== 1 ? 's' : ''}.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <DeleteAllGroupsButton />
+            <CreateGroupModal triggerLabel="+ New group" />
+          </div>
         </div>
-        <CreateGroupModal triggerLabel="+ New group" />
-      </div>
 
       {/* Hero — net balance */}
       <section
@@ -210,6 +214,7 @@ export default async function DashboardPage() {
                 membersCount={d.membersCount}
                 expensesCount={d.expensesCount}
                 netBalance={d.net}
+                currentUserId={user.id}
               />
             ))}
           </div>

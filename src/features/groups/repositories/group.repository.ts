@@ -61,4 +61,33 @@ export class GroupRepository {
     }
     return data as GroupMember;
   }
+
+  async deleteGroup(groupId: string): Promise<boolean> {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('groups')
+      .delete()
+      .eq('id', groupId);
+
+    if (error) {
+      console.error('Error deleting group:', error);
+      return false;
+    }
+    return true;
+  }
+
+  async leaveGroup(groupId: string, userId: string): Promise<boolean> {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from('group_members')
+      .delete()
+      .eq('group_id', groupId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error leaving group:', error);
+      return false;
+    }
+    return true;
+  }
 }
