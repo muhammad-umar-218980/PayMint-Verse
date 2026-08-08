@@ -34,7 +34,7 @@ export default async function ExpenseList({ groupId, membersMap, currentUserId }
   );
 
   return (
-    <div className="space-y-4">
+    <div className="divide-y divide-line">
       {expensesWithSplits.map((exp) => (
         <ExpenseCard 
           key={exp.id} 

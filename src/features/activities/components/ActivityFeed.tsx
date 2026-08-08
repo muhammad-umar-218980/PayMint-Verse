@@ -11,11 +11,11 @@ export default async function ActivityFeed({ currentUserId }: ActivityFeedProps)
 
   if (activities.length === 0) {
     return (
-      <div className="bg-[#151f30] border border-white/5 rounded-2xl p-6 h-full min-h-[300px] flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-          <Receipt className="w-5 h-5 text-slate-500" />
+      <div className="bg-white border border-line rounded-[26px] p-6 h-full min-h-[300px] flex flex-col items-center justify-center text-center shadow-[0_40px_80px_-40px_rgba(6,46,35,0.12)]">
+        <div className="w-12 h-12 rounded-full bg-emerald-600/10 flex items-center justify-center mb-4">
+          <Receipt className="w-5 h-5 text-emerald-600" />
         </div>
-        <p className="text-slate-400 text-sm">No recent activity.</p>
+        <p className="text-slate-500 text-sm">No recent activity.</p>
       </div>
     );
   }
@@ -37,28 +37,28 @@ export default async function ActivityFeed({ currentUserId }: ActivityFeedProps)
   };
 
   const getIcon = (action: string) => {
-    if (action.includes('expense')) return <Receipt className="w-4 h-4 text-violet-400" />;
-    if (action.includes('payment')) return <HandCoins className="w-4 h-4 text-emerald-400" />;
-    if (action.includes('member')) return <UserPlus className="w-4 h-4 text-cyan-400" />;
-    if (action.includes('delete')) return <Trash2 className="w-4 h-4 text-red-400" />;
+    if (action.includes('expense')) return <Receipt className="w-4 h-4 text-emerald-600" />;
+    if (action.includes('payment')) return <HandCoins className="w-4 h-4 text-emerald-700" />;
+    if (action.includes('member')) return <UserPlus className="w-4 h-4 text-blue-500" />;
+    if (action.includes('delete')) return <Trash2 className="w-4 h-4 text-red-500" />;
     return <Receipt className="w-4 h-4 text-slate-400" />;
   };
 
   const getIconBg = (action: string) => {
-    if (action.includes('expense')) return 'bg-violet-900/20 border-violet-700/30';
-    if (action.includes('payment')) return 'bg-emerald-900/20 border-emerald-700/30';
-    if (action.includes('member')) return 'bg-cyan-900/20 border-cyan-700/30';
-    if (action.includes('delete')) return 'bg-red-900/20 border-red-700/30';
-    return 'bg-slate-800 border-slate-700';
+    if (action.includes('expense')) return 'bg-emerald-600/10 border-emerald-600/20';
+    if (action.includes('payment')) return 'bg-emerald-600/10 border-emerald-600/20';
+    if (action.includes('member')) return 'bg-blue-500/10 border-blue-500/20';
+    if (action.includes('delete')) return 'bg-red-500/10 border-red-500/20';
+    return 'bg-slate-100 border-slate-200';
   };
 
   return (
-    <div className="bg-[#151f30] border border-white/5 rounded-2xl overflow-hidden h-full flex flex-col">
-      <div className="p-5 border-b border-white/5 bg-[#0d1526]/50 shrink-0">
-        <h3 className="font-space font-bold text-white flex items-center gap-2">
-          Activity Feed
+    <div className="bg-white border border-line rounded-[26px] overflow-hidden h-full flex flex-col shadow-[0_40px_80px_-40px_rgba(6,46,35,0.12)]">
+      <div className="p-5 border-b border-line bg-[#F5F7F4]/50 shrink-0">
+        <h3 className="font-serif text-[22px] tracking-tight text-ink flex items-center gap-2">
+          Recent Activity
         </h3>
-        <p className="text-xs text-slate-400 mt-1">Recent updates across your groups.</p>
+        <p className="text-xs text-slate-500 mt-1">Recent updates across your groups.</p>
       </div>
 
       <div className="p-5 flex-1 overflow-y-auto space-y-4">
@@ -81,21 +81,20 @@ export default async function ActivityFeed({ currentUserId }: ActivityFeedProps)
                 <div className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 ${getIconBg(act.action)}`}>
                   {getIcon(act.action)}
                 </div>
-                {/* Timeline connector (could add if we want a line connecting them) */}
               </div>
               
               <div className="flex-1 pb-1">
-                <p className="text-sm text-slate-300">
-                  <span className={`font-semibold ${isYou ? 'text-white' : 'text-slate-200'}`}>{name}</span>
+                <p className="text-sm text-slate-600">
+                  <span className={`font-semibold ${isYou ? 'text-ink' : 'text-slate-800'}`}>{name}</span>
                   {' '}
-                  <span className="text-slate-400">{act.action}</span>
+                  <span className="text-slate-500">{act.action}</span>
                   {' '}
-                  {detailsText && <span className="font-medium text-slate-300">{detailsText}</span>}
+                  {detailsText && <span className="font-medium text-slate-700">{detailsText}</span>}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[11px] text-slate-500 font-medium">{formatTimeAgo(act.created_at)}</span>
-                  <span className="text-[10px] text-slate-600">•</span>
-                  <span className="text-[11px] text-violet-400 font-medium tracking-wide">{act.group?.name}</span>
+                  <span className="text-[11px] text-slate-400 font-medium">{formatTimeAgo(act.created_at)}</span>
+                  <span className="text-[10px] text-slate-300">•</span>
+                  <span className="text-[11px] text-emerald-700 font-medium tracking-wide">{act.group?.name}</span>
                 </div>
               </div>
             </div>

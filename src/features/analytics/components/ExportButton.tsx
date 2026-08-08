@@ -3,8 +3,18 @@
 import { Download } from 'lucide-react';
 import { useState } from 'react';
 
+interface ExportableExpense {
+  created_at: string;
+  title: string;
+  category?: string | null;
+  payer?: { full_name?: string | null; email?: string } | null;
+  amount: number;
+  currency: string;
+  description?: string | null;
+}
+
 interface ExportButtonProps {
-  expenses: any[];
+  expenses: ExportableExpense[];
   groupName: string;
 }
 
@@ -56,7 +66,7 @@ export default function ExportButton({ expenses, groupName }: ExportButtonProps)
     <button
       onClick={handleExport}
       disabled={loading || expenses.length === 0}
-      className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-2 px-4 py-2 border border-line bg-white hover:bg-[#F5F7F4] text-slate-600 rounded-xl text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Download className="w-4 h-4" />
       Export to CSV

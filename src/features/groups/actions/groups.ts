@@ -58,9 +58,63 @@ export async function addMemberAction(groupId: string, email: string) {
     return { error: 'Failed to add member to group. Make sure you are the group owner.' };
   }
 
-  // Log activity
+// Log activity
   await activityService.logMemberAdded(user.id, groupId, profileToInvite.id);
 
   revalidatePath(`/groups/${groupId}`);
+  return { success: true };
+}
+
+export async function deleteGroupAction(groupId: string) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
+
+  const success = await groupService.deleteGroup(groupId);
+
+  if (!success) {
+    return { error: 'Failed to delete group or permission denied.' };
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath(`/groups/${groupId}`);
+  return { success: true };
+}
+
+export async function leaveGroupAction(groupId: string) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
+
+  const success = await groupService.leaveGroup(groupId, user.id);
+
+  if (!success) {
+    return { error: 'Failed to leave this group.' };
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath(`/groups/${groupId}`);
+  return { success: true };
+}
+
+export async function deleteAllGroupsAction() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
+
+  const { error } = await supabase
+    .from('groups')
+    .delete()
+    .eq('created_by', user.id);
+
+  if (error) {
+    console.error('Error deleting all groups:', error);
+    return { error: 'Failed to delete your groups.' };
+  }
+
+  revalidatePath('/dashboard');
   return { success: true };
 }
