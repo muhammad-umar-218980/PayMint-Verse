@@ -10,6 +10,7 @@ import GroupCard from '@/features/groups/components/GroupCard';
 import DeleteAllGroupsButton from '@/features/groups/components/DeleteAllGroupsButton';
 import ActivityFeed from '@/features/activities/components/ActivityFeed';
 import CategoryPieChart from '@/features/analytics/components/CategoryPieChart';
+import LiveDashboardRefresher from '@/features/groups/components/LiveDashboardRefresher';
 import { Users, TrendingUp, HandCoins, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 export default async function DashboardPage() {
@@ -129,6 +130,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-6 lg:px-10 py-8 lg:pt-10 pt-[80px] max-w-[1100px] mx-auto">
+      <LiveDashboardRefresher />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-8">
 <div>

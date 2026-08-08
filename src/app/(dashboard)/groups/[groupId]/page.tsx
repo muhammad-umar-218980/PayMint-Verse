@@ -13,6 +13,7 @@ import CategoryPieChart from '@/features/analytics/components/CategoryPieChart';
 import ExportButton from '@/features/analytics/components/ExportButton';
 import ActivityFeed from '@/features/activities/components/ActivityFeed';
 import GroupActionButton from '@/features/groups/components/GroupActionButton';
+import LiveGroupRefresher from '@/features/groups/components/LiveGroupRefresher';
 
 export default async function GroupPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
@@ -55,6 +56,7 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
 
   return (
     <div className="px-6 lg:px-10 py-8 lg:pt-10 pt-[80px] max-w-[920px] mx-auto">
+      <LiveGroupRefresher groupId={group.id} />
       {/* Header — like the landing page mockup */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8">
         <div>
