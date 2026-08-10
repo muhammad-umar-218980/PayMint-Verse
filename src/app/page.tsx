@@ -362,16 +362,16 @@ function HeroAppMockup() {
 
 function TrustStrip() {
   const items = [
-    "10k+ groups tracked",
-    "$50M+ split fairly",
-    "4.9★ user rating",
-    "0 spreadsheets required",
-    "Bank-level security",
+    "Free forever",
+    "4 ways to split",
+    "1 tap to settle",
+    "CSV export",
+    "Debt simplification",
   ];
   return (
     <section className="pm-trust" data-reveal>
       <p className="pm-trust-title">
-        Trusted by roommates, weekend crews, wedding parties, and remote teams in 40+ countries.
+        Built for roommates, weekend crews, wedding parties, and remote teams.
       </p>
       <div className="pm-trust-track">
         <div className="pm-trust-inner">
@@ -413,7 +413,7 @@ function ProblemSolution() {
               <li><Check size={16} /> Log an expense in three seconds, from anywhere.</li>
               <li><Check size={16} /> Split evenly, by share, by percentage, or exact amount.</li>
               <li><Check size={16} /> Our engine collapses circular debts into the fewest transfers.</li>
-              <li><Check size={16} /> One-tap settlement, receipt in your inbox, done.</li>
+              <li><Check size={16} /> One-tap settlement, debt cleared, done.</li>
             </ul>
           </article>
         </div>
@@ -427,7 +427,7 @@ function FeaturesDeepDive() {
     {
       icon: <Receipt />,
       title: "Log in seconds",
-      body: "Snap a receipt, pick a group, tag participants. We handle the rest.",
+      body: "Type it in, pick a group, tag participants. We handle the rest.",
       tag: "Capture",
     },
     {
@@ -569,10 +569,10 @@ function SplitDemo() {
 
 function StatsSection() {
   const stats = [
-    { n: "500K+", t: "Expenses tracked", d: "Across weekend trips, apartments, and remote teams." },
-    { n: "4.9", t: "User satisfaction", d: "Averaged across the App Store and Play Store." },
-    { n: "42%", t: "Fewer transfers", d: "Median reduction after debt simplification runs." },
-    { n: "1-tap", t: "To settle up", d: "Whether it is $6 or $600, closing out takes seconds." },
+    { n: "3 s", t: "To log an expense", d: "Title, amount, who paid, split — done." },
+    { n: "4", t: "Ways to split", d: "Equal, exact, shares, or percentage." },
+    { n: "1", t: "Tap to settle", d: "Simplified balances, fewer transfers." },
+    { n: "0", t: "Spreadsheets", d: "Expenses, balances, exports in one place." },
   ];
   return (
     <section className="pm-stats">
@@ -580,7 +580,7 @@ function StatsSection() {
         <div className="pm-stats-head">
           <span className="pm-sec-kicker pm-sec-kicker-light" data-reveal>By the numbers</span>
           <h2 className="pm-stats-title" data-split>
-            Numbers that matter, from people who stopped arguing about money.
+            The numbers that matter to a group.
           </h2>
         </div>
         <div className="pm-stats-grid" data-stagger>
@@ -736,9 +736,9 @@ function AnalyticsSection() {
 function HowItWorks() {
   const steps = [
     { n: "01", t: "Create a group", d: "Trip, apartment, team — invite by link. No accounts required." },
-    { n: "02", t: "Log expenses", d: "Snap a receipt or type it in. Three seconds, done." },
+    { n: "02", t: "Log expenses", d: "Type it in the moment it happens. Three seconds, done." },
     { n: "03", t: "Choose a split", d: "Equal, exact, share, or percentage — per expense." },
-    { n: "04", t: "Settle up", d: "PayMint collapses the chain. One tap via EasyPaisa or JazzCash." },
+    { n: "04", t: "Settle up", d: "PayMint collapses the chain — settle your way, no awkward reminders." },
   ];
   return (
     <section className="pm-how">
@@ -794,7 +794,7 @@ function FinalCTA() {
               <strong>No card required</strong><span>Sign up in seconds</span>
             </div>
             <div className="pm-cta-chip" data-stagger-item>
-              <strong>Made in Pakistan</strong><span>EasyPaisa &amp; JazzCash built-in</span>
+              <strong>Made in Pakistan</strong><span>For trips, flats, and teams</span>
             </div>
           </div>
         </div>
@@ -821,7 +821,7 @@ function Footer() {
             <h5>Product</h5>
             <a href="#features">Features</a>
             <a href="#how">How it works</a>
-            <a href="#pricing">Pricing</a>
+            <a href="#analytics">Analytics</a>
           </div>
           <div>
             <h5>Company</h5>
