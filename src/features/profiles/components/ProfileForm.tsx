@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { updateProfileAction } from '../actions/profile.actions';
+import { createClient } from '@/lib/supabase/client';
 import { Profile } from '@/types';
-import { Check, AlertCircle } from 'lucide-react';
+import { Check, AlertCircle, Camera } from 'lucide-react';
 
 interface ProfileFormProps {
   initialProfile: Profile;
@@ -16,10 +17,45 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(initialProfile.avatar_url);
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
     setMessage('');
+
+    const avatarFile = formData.get('avatar') as File | null;
+    if (avatarFile && avatarFile.size > 0) {
+      if (!avatarFile.type.startsWith('image/')) {
+        setMessage('Please choose an image file.');
+        setIsSuccess(false);
+        setIsPending(false);
+        return;
+      }
+      if (avatarFile.size > 5 * 1024 * 1024) {
+        setMessage('Avatar must be under 5 MB.');
+        setIsSuccess(false);
+        setIsPending(false);
+        return;
+      }
+
+      const supabase = createClient();
+      const path = `${initialProfile.id}/avatar`;
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, avatarFile, { upsert: true, cacheControl: '3600' });
+
+      if (uploadError) {
+        setMessage(`Failed to upload avatar: ${uploadError.message}`);
+        setIsSuccess(false);
+        setIsPending(false);
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path);
+      formData.set('avatar_url', publicUrl);
+      setAvatarPreview(publicUrl);
+    }
+
     try {
       await updateProfileAction(formData);
       setMessage('Profile updated successfully!');
@@ -47,6 +83,33 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       )}
 
       <form action={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="avatar" className="block text-sm font-medium text-slate-600 mb-2">Profile Picture</label>
+          <label
+            htmlFor="avatar"
+            className="flex items-center gap-4 cursor-pointer group w-fit"
+          >
+            <div className="w-16 h-16 rounded-full bg-emerald-600/10 border border-emerald-600/20 overflow-hidden flex items-center justify-center group-hover:opacity-80 transition-opacity">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
+              ) : (
+                <Camera className="w-6 h-6 text-emerald-600" />
+              )}
+            </div>
+            <span className="text-[13px] font-medium text-emerald-600 group-hover:text-emerald-700 transition-colors">
+              {avatarPreview ? 'Change photo' : 'Upload a photo'}
+            </span>
+          </label>
+          <input
+            type="file"
+            id="avatar"
+            name="avatar"
+            accept="image/*"
+            className="hidden"
+          />
+          <p className="text-[11px] text-slate-400 mt-2">JPG, PNG or WebP, up to 5 MB.</p>
+        </div>
+
         <div>
           <label htmlFor="full_name" className="block text-sm font-medium text-slate-600 mb-2">Full Name</label>
           <input

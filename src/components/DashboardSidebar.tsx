@@ -20,9 +20,11 @@ import {
   PiggyBank,
 } from 'lucide-react';
 import CreateGroupModal from '@/features/groups/components/CreateGroupModal';
+import NotificationBell from '@/features/notifications/components/NotificationBell';
 
 interface DashboardSidebarProps {
-  user: { email?: string; user_metadata?: { full_name?: string } };
+  user: { id: string; email?: string; user_metadata?: { full_name?: string } };
+  avatarUrl?: string | null;
   groups: { id: string; name: string }[];
   children: React.ReactNode;
 }
@@ -131,8 +133,9 @@ function GroupList({ groups, pathname, collapsed, onNavigate }: {
   );
 }
 
-function UserFooter({ user, initials, collapsed, onNavigate }: {
-  user: { email?: string; user_metadata?: { full_name?: string } };
+function UserFooter({ user, avatarUrl, initials, collapsed, onNavigate }: {
+  user: { id: string; email?: string; user_metadata?: { full_name?: string } };
+  avatarUrl?: string | null;
   initials: string;
   collapsed: boolean;
   onNavigate?: () => void;
@@ -140,11 +143,17 @@ function UserFooter({ user, initials, collapsed, onNavigate }: {
   return (
     <div className={`px-3 py-3 border-t border-line shrink-0 ${collapsed ? 'lg:px-2' : ''}`}>
       <div className={`flex items-center ${collapsed ? 'lg:justify-center' : 'gap-2.5'} mb-2.5`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 ${
-          collapsed ? 'bg-ink text-paper' : 'bg-ink text-paper'
-        }`}>
-          {initials}
-        </div>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt="Profile"
+            className="w-8 h-8 rounded-full object-cover shrink-0 border border-emerald-600/20"
+          />
+        ) : (
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 bg-ink text-paper`}>
+            {initials}
+          </div>
+        )}
         <div className={`min-w-0 ${collapsed ? 'lg:hidden' : ''}`}>
           <p className="text-[13.5px] font-medium text-ink truncate">
             {user.user_metadata?.full_name || 'User'}
@@ -164,22 +173,24 @@ function UserFooter({ user, initials, collapsed, onNavigate }: {
           <User className="w-4 h-4 shrink-0" />
           <span className={collapsed ? 'lg:hidden' : ''}>Profile</span>
         </Link>
-        <a
-          href="/auth/signout"
-          title={collapsed ? 'Sign Out' : undefined}
-          className={`flex items-center justify-center gap-2 rounded-lg text-[13px] font-medium text-ink/60 hover:text-red-500 hover:bg-red-50 transition-colors ${
-            collapsed ? 'w-9 h-9' : 'flex-1 px-3 py-2'
-          }`}
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          <span className={collapsed ? 'lg:hidden' : ''}>Sign Out</span>
-        </a>
+        <form action="/auth/signout" method="POST">
+          <button
+            type="submit"
+            title={collapsed ? 'Sign Out' : undefined}
+            className={`flex items-center justify-center gap-2 rounded-lg text-[13px] font-medium text-ink/60 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer ${
+              collapsed ? 'w-9 h-9' : 'flex-1 px-3 py-2'
+            }`}
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            <span className={collapsed ? 'lg:hidden' : ''}>Sign Out</span>
+          </button>
+        </form>
       </div>
     </div>
   );
 }
 
-export default function DashboardSidebar({ user, groups, children }: DashboardSidebarProps) {
+export default function DashboardSidebar({ user, avatarUrl, groups, children }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -223,21 +234,24 @@ export default function DashboardSidebar({ user, groups, children }: DashboardSi
                   Pay<span className="text-emerald-600">Mint</span>
                 </span>
               </div>
-              <button
-                onClick={() => setCollapsed(true)}
-                title="Collapse sidebar"
-                aria-label="Collapse sidebar"
-                className="p-2 rounded-lg text-ink/40 hover:text-ink hover:bg-ink/[0.05] transition-colors cursor-pointer"
-              >
-                <PanelLeftClose className="w-[18px] h-[18px]" />
-              </button>
+              <div className="flex items-center gap-1">
+                <NotificationBell userId={user.id} />
+                <button
+                  onClick={() => setCollapsed(true)}
+                  title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
+                  className="p-2 rounded-lg text-ink/40 hover:text-ink hover:bg-ink/[0.05] transition-colors cursor-pointer"
+                >
+                  <PanelLeftClose className="w-[18px] h-[18px]" />
+                </button>
+              </div>
             </>
           )}
         </div>
 
         <GroupList groups={groups} pathname={pathname} collapsed={collapsed} />
 
-        <UserFooter user={user} initials={initials} collapsed={collapsed} />
+        <UserFooter user={user} avatarUrl={avatarUrl} initials={initials} collapsed={collapsed} />
       </aside>
 
       {/* Collapsed rail — expand button pinned under header */}
@@ -264,9 +278,12 @@ export default function DashboardSidebar({ user, groups, children }: DashboardSi
           <Link href="/profile" className="p-2 rounded-lg text-ink/50 hover:text-ink hover:bg-ink/[0.05] transition-colors">
             <User className="w-5 h-5" />
           </Link>
-          <a href="/auth/signout" className="p-2 rounded-lg text-ink/50 hover:text-red-500 hover:bg-red-50 transition-colors">
-            <LogOut className="w-5 h-5" />
-          </a>
+          <NotificationBell userId={user.id} />
+          <form action="/auth/signout" method="POST">
+            <button type="submit" className="p-2 rounded-lg text-ink/50 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer">
+              <LogOut className="w-5 h-5" />
+            </button>
+          </form>
           <button
             onClick={() => setMenuOpen((v) => !v)}
             className="p-2 rounded-lg text-ink hover:bg-ink/[0.05] transition-colors cursor-pointer"
@@ -291,7 +308,7 @@ export default function DashboardSidebar({ user, groups, children }: DashboardSi
               </button>
             </div>
             <GroupList groups={groups} pathname={pathname} collapsed={false} onNavigate={() => setMenuOpen(false)} />
-            <UserFooter user={user} initials={initials} collapsed={false} onNavigate={() => setMenuOpen(false)} />
+            <UserFooter user={user} avatarUrl={avatarUrl} initials={initials} collapsed={false} onNavigate={() => setMenuOpen(false)} />
           </div>
         </div>
       )}

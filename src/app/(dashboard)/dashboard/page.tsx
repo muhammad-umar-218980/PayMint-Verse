@@ -23,6 +23,7 @@ export default async function DashboardPage() {
 
   const profileService = new ProfileService();
   const profile = await profileService.getProfile(user.id);
+  const currency = profile?.currency || 'PKR';
 
   const fullName = profile?.full_name || (user.user_metadata?.full_name as string) || '';
   const firstName = fullName.split(' ')[0] || 'there';
@@ -108,21 +109,21 @@ export default async function DashboardPage() {
     {
       label: 'Total spent',
       icon: <TrendingUp className="w-4 h-4 text-emerald-600" />,
-      value: `PKR ${totalSpent.toLocaleString()}`,
+      value: `${currency} ${totalSpent.toLocaleString()}`,
       sub: `${totalExpenses} expense${totalExpenses !== 1 ? 's' : ''} total`,
       color: 'text-ink',
     },
     {
       label: 'You are owed',
       icon: <HandCoins className="w-4 h-4 text-emerald-600" />,
-      value: `PKR ${totalOwedToYou.toLocaleString()}`,
+      value: `${currency} ${totalOwedToYou.toLocaleString()}`,
       sub: 'Across all groups',
       color: 'text-emerald-600',
     },
     {
       label: 'You owe',
       icon: <Wallet className="w-4 h-4 text-emerald-600" />,
-      value: `PKR ${totalYouOwe.toLocaleString()}`,
+      value: `${currency} ${totalYouOwe.toLocaleString()}`,
       sub: 'Pending settlements',
       color: 'text-red-500',
     },
@@ -155,7 +156,7 @@ export default async function DashboardPage() {
           <div>
             <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-700 mb-2">Net balance · All groups</p>
             <p className={`font-serif text-5xl lg:text-6xl tracking-tight leading-none ${netTotal >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-              {netTotal >= 0 ? '+' : '−'}PKR {Math.abs(netTotal).toLocaleString()}
+              {netTotal >= 0 ? '+' : '−'}{currency} {Math.abs(netTotal).toLocaleString()}
             </p>
             <p className="text-[13px] text-slate-500 mt-3">The simplified view of what everyone owes, across every group.</p>
           </div>
@@ -166,7 +167,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500">Owed to you</p>
-                <p className="font-serif text-xl tracking-tight text-emerald-600">PKR {totalOwedToYou.toLocaleString()}</p>
+                <p className="font-serif text-xl tracking-tight text-emerald-600">{currency} {totalOwedToYou.toLocaleString()}</p>
               </div>
             </div>
             <div className="bg-white rounded-2xl border border-line px-5 py-3.5 flex items-center gap-3">
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500">You owe</p>
-                <p className="font-serif text-xl tracking-tight text-red-500">PKR {totalYouOwe.toLocaleString()}</p>
+                <p className="font-serif text-xl tracking-tight text-red-500">{currency} {totalYouOwe.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -217,6 +218,7 @@ export default async function DashboardPage() {
                 expensesCount={d.expensesCount}
                 netBalance={d.net}
                 currentUserId={user.id}
+                currency={currency}
               />
             ))}
           </div>
@@ -233,7 +235,7 @@ export default async function DashboardPage() {
             <p className="text-xs text-slate-500 mt-1">Where your money went, across all groups.</p>
           </div>
         </div>
-        <CategoryPieChart data={categoryList} />
+        <CategoryPieChart data={categoryList} currency={currency} />
       </div>
     </div>
   );

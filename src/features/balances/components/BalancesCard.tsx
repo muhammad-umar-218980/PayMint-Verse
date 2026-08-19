@@ -65,6 +65,7 @@ function SettlementRow({
           transaction={t}
           membersMap={membersMap}
           currentUserId={currentUserId}
+          currency={currency}
           className={SETTLE_PILL_CLASS}
           label="Settle up"
         />

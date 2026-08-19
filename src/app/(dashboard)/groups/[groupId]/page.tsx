@@ -14,6 +14,7 @@ import ExportButton from '@/features/analytics/components/ExportButton';
 import ActivityFeed from '@/features/activities/components/ActivityFeed';
 import GroupActionButton from '@/features/groups/components/GroupActionButton';
 import LiveGroupRefresher from '@/features/groups/components/LiveGroupRefresher';
+import { ProfileService } from '@/features/profiles/services/profile.service';
 
 export default async function GroupPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
@@ -33,6 +34,10 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
 
   const expenseService = new ExpenseService();
   const members = await expenseService.getGroupMembers(groupId);
+
+  const profileService = new ProfileService();
+  const profile = await profileService.getProfile(user.id);
+  const currency = profile?.currency || 'PKR';
 
   const membersMap = members.reduce((acc, member) => {
     acc[member.user_id] = member.profile?.full_name || member.profile?.email || 'Unknown';
@@ -81,7 +86,7 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
               {net >= 0 ? 'You are owed' : 'You owe'}
             </span>
             <span className={`font-serif text-3xl leading-none tracking-tight ${net >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-              {net < 0 ? '−' : ''}PKR {Math.abs(net).toLocaleString()}
+              {net < 0 ? '−' : ''}{currency} {Math.abs(net).toLocaleString()}
             </span>
           </div>
           <div className="flex gap-3">
@@ -91,7 +96,7 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
               isOwner={group.created_by === user.id}
             />
             <AddMemberModal groupId={group.id} />
-            <AddExpenseModal groupId={group.id} members={members} currentUserId={user.id} />
+            <AddExpenseModal groupId={group.id} members={members} currentUserId={user.id} currency={currency} />
           </div>
         </div>
       </div>
@@ -108,6 +113,7 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
           membersMap={membersMap}
           currentUserId={user.id}
           initialTransactions={transactions}
+          currency={currency}
         />
       </div>
 
@@ -121,7 +127,7 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
             </div>
             <ExportButton expenses={expenses} groupName={group.name} />
           </div>
-          <CategoryPieChart data={categoryData} />
+          <CategoryPieChart data={categoryData} currency={currency} />
         </div>
 
         <ActivityFeed currentUserId={user.id} />

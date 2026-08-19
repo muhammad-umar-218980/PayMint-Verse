@@ -9,9 +9,10 @@ interface GroupCardProps {
   expensesCount?: number;
   netBalance?: number;
   currentUserId?: string;
+  currency?: string;
 }
 
-export default function GroupCard({ group, membersCount, expensesCount, netBalance, currentUserId }: GroupCardProps) {
+export default function GroupCard({ group, membersCount, expensesCount, netBalance, currentUserId, currency = 'PKR' }: GroupCardProps) {
   const hasBalance = typeof netBalance === 'number';
   const settled = hasBalance && netBalance === 0;
   const owed = hasBalance && netBalance > 0;
@@ -50,11 +51,11 @@ export default function GroupCard({ group, membersCount, expensesCount, netBalan
             </span>
           ) : owes ? (
             <span className="font-serif text-lg tracking-tight text-red-500">
-              &minus;PKR {Math.abs(netBalance!).toLocaleString()}
+              &minus;{currency} {Math.abs(netBalance!).toLocaleString()}
             </span>
           ) : owed ? (
             <span className="font-serif text-lg tracking-tight text-emerald-600">
-              +PKR {netBalance!.toLocaleString()}
+              +{currency} {netBalance!.toLocaleString()}
             </span>
           ) : null}
         </div>

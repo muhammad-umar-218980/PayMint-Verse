@@ -4,9 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { GroupService } from '../services/group.service';
 import { ActivityService } from '@/features/activities/services/activity.service';
+import { NotificationService } from '@/features/notifications/services/notification.service';
 
 const groupService = new GroupService();
 const activityService = new ActivityService();
+const notificationService = new NotificationService();
 
 export async function createGroup(formData: FormData) {
   const supabase = await createClient();
@@ -60,6 +62,20 @@ export async function addMemberAction(groupId: string, email: string) {
 
 // Log activity
   await activityService.logMemberAdded(user.id, groupId, profileToInvite.id);
+
+  // Notify the new member
+  const { data: group } = await supabase
+    .from('groups')
+    .select('name')
+    .eq('id', groupId)
+    .single();
+  const actorName = (user.user_metadata?.full_name as string) || 'Someone';
+  await notificationService.send(
+    profileToInvite.id,
+    'member_added',
+    `${actorName} added you to "${group?.name ?? 'a group'}"`,
+    groupId
+  );
 
   revalidatePath(`/groups/${groupId}`);
   return { success: true };

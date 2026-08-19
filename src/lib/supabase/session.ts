@@ -58,7 +58,8 @@ export async function updateSession(request: NextRequest) {
     user &&
     pathname.startsWith('/auth') &&
     !pathname.startsWith('/auth/callback') &&
-    !pathname.startsWith('/auth/signout')
+    !pathname.startsWith('/auth/signout') &&
+    !pathname.startsWith('/auth/update-password')
   ) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = '/dashboard';
