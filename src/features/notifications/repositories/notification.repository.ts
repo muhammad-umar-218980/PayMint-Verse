@@ -39,11 +39,14 @@ export class NotificationRepository {
     relatedId?: string | null
   ): Promise<void> {
     const supabase = await createClient();
-    await supabase.rpc('send_notification', {
+    const { error } = await supabase.rpc('send_notification', {
       target_user_id: targetUserId,
       p_type: type,
       p_message: message,
       p_related_id: relatedId ?? null,
     });
+    if (error) {
+      console.error('Error sending notification:', error);
+    }
   }
 }

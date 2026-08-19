@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION public.send_notification(
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
-STABLE
+VOLATILE
 SET search_path = ''
 AS $$
 BEGIN

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Bell, CheckCheck, HandCoins, Receipt, UserPlus } from 'lucide-react';
+import { Bell, CheckCheck, HandCoins, Receipt, Trash2, UserPlus } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Notification } from '@/types';
 
@@ -31,6 +31,7 @@ export default function NotificationBell({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
+  const [confirmClear, setConfirmClear] = useState(false);
   const loadingRef = useRef(false);
 
   useEffect(() => {
@@ -93,6 +94,30 @@ export default function NotificationBell({ userId }: { userId: string }) {
     loadingRef.current = false;
   };
 
+  const handleClearAll = async () => {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      setTimeout(() => setConfirmClear(false), 3000);
+      return;
+    }
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+    const supabase = createClient();
+    await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId);
+    setNotifications([]);
+    setUnread(0);
+    setConfirmClear(false);
+    loadingRef.current = false;
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setConfirmClear(false);
+  };
+
   return (
     <div className="relative">
       <button
@@ -111,19 +136,34 @@ export default function NotificationBell({ userId }: { userId: string }) {
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] bg-white border border-line rounded-2xl shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-line bg-[#F5F7F4]/50">
-              <h3 className="text-[13px] font-semibold text-ink">Notifications</h3>
-              {unread > 0 && (
-                <button
-                  onClick={handleMarkAllRead}
-                  className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer"
-                >
-                  <CheckCheck className="w-3.5 h-3.5" />
-                  Mark all read
-                </button>
-              )}
+          <div className="fixed inset-0 z-40" onClick={handleClose} />
+          <div className="absolute right-0 lg:left-0 lg:right-auto top-[calc(100%+8px)] z-50 w-[min(320px,calc(100vw-2rem))] bg-white border border-line rounded-2xl shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-line bg-[#F5F7F4]/50">
+              <h3 className="text-[13px] font-semibold text-ink shrink-0">Notifications</h3>
+              <div className="flex items-center gap-3 min-w-0">
+                {notifications.length > 0 && (
+                  <button
+                    onClick={handleClearAll}
+                    className={`flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer shrink-0 ${
+                      confirmClear
+                        ? 'text-red-600 font-bold'
+                        : 'text-red-500/80 hover:text-red-600'
+                    }`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    {confirmClear ? 'Confirm?' : 'Clear all'}
+                  </button>
+                )}
+                {unread > 0 && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer shrink-0"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5" />
+                    Mark all read
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="max-h-[320px] overflow-y-auto">
