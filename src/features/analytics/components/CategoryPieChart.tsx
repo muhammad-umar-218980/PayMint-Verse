@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 
 interface CategoryPieChartProps {
   data: { name: string; value: number }[];
+  currency?: string;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -17,13 +18,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Other': '#64748b'  // Slate
 };
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
+const CustomTooltip = ({ active, payload, currency }: { active?: boolean; payload?: { name: string; value: number }[]; currency: string }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white border border-line rounded-xl p-3 shadow-xl">
         <p className="text-ink font-medium mb-1">{payload[0].name}</p>
         <p className="text-emerald-700 font-serif tracking-tight">
-          PKR {payload[0].value.toLocaleString()}
+          {currency} {payload[0].value.toLocaleString()}
         </p>
       </div>
     );
@@ -31,7 +32,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { name
   return null;
 };
 
-export default function CategoryPieChart({ data }: CategoryPieChartProps) {
+export default function CategoryPieChart({ data, currency = 'PKR' }: CategoryPieChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="h-[300px] flex items-center justify-center text-slate-500 text-sm">
@@ -58,7 +59,7 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
               <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[entry.name] || CATEGORY_COLORS['Other']} />
             ))}
           </Pie>
-          <Tooltip content={<CustomTooltip />} cursor={{fill: 'transparent'}} />
+          <Tooltip content={<CustomTooltip currency={currency} />} cursor={{fill: 'transparent'}} />
           <Legend 
             verticalAlign="bottom" 
             height={36}

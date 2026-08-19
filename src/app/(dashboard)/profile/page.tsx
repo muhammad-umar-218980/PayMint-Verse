@@ -35,9 +35,17 @@ export default async function ProfilePage() {
       {/* Profile Card */}
       <div className="bg-white border border-line rounded-[26px] p-8 max-w-2xl shadow-[0_40px_80px_-40px_rgba(6,46,35,0.12)]">
         <div className="flex items-center gap-4 mb-8 pb-6 border-b border-line">
-          <div className="w-14 h-14 rounded-full bg-emerald-600/10 border border-emerald-600/20 flex items-center justify-center">
-            <User className="w-7 h-7 text-emerald-600" />
-          </div>
+          {profile.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt="Profile"
+              className="w-14 h-14 rounded-full object-cover border border-emerald-600/20"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-emerald-600/10 border border-emerald-600/20 flex items-center justify-center">
+              <User className="w-7 h-7 text-emerald-600" />
+            </div>
+          )}
           <div>
             <p className="font-serif text-2xl tracking-tight text-ink">{profile.full_name || 'Set your name'}</p>
             <p className="text-slate-500 text-sm">{profile.email}</p>

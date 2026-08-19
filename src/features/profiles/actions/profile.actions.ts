@@ -17,11 +17,13 @@ export async function updateProfileAction(formData: FormData) {
   const fullName = formData.get('full_name') as string;
   const currency = formData.get('currency') as string;
   const timezone = formData.get('timezone') as string;
+  const avatarUrl = formData.get('avatar_url') as string | null;
 
   const updates = {
     full_name: fullName,
     currency,
     timezone,
+    avatar_url: avatarUrl || null,
   };
 
   const profile = await profileService.updateProfile(user.id, updates);

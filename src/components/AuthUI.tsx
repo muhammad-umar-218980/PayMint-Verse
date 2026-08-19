@@ -350,12 +350,12 @@ export default function AuthUI({ mode }: AuthUIProps) {
               </div>
 
               <div className="w-full text-right mb-4">
-                <a
-                  href="#"
+                <Link
+                  href="/auth/forgot-password"
                   className="text-[11px] text-[#062E23]/60 hover:text-[#059669] transition-colors font-medium"
                 >
                   Forgot Password?
-                </a>
+                </Link>
               </div>
 
               <button

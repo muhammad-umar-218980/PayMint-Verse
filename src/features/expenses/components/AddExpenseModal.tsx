@@ -10,6 +10,7 @@ interface AddExpenseModalProps {
   groupId: string;
   members: (GroupMember & { profile: { full_name: string | null; email: string } })[];
   currentUserId: string;
+  currency?: string;
 }
 
 const CATEGORIES = [
@@ -31,7 +32,7 @@ type SplitDetail =
   | { user_id: string; percentage: number }
   | { user_id: string; shares: number };
 
-export default function AddExpenseModal({ groupId, members, currentUserId }: AddExpenseModalProps) {
+export default function AddExpenseModal({ groupId, members, currentUserId, currency = 'PKR' }: AddExpenseModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +131,7 @@ export default function AddExpenseModal({ groupId, members, currentUserId }: Add
     formData.append('title', title);
     formData.append('description', description);
     formData.append('amount', amount);
-    formData.append('currency', 'PKR'); // Fixed for now
+    formData.append('currency', currency);
     formData.append('category', category);
     formData.append('paid_by', paidBy);
 
@@ -201,7 +202,7 @@ export default function AddExpenseModal({ groupId, members, currentUserId }: Add
                   <div>
                     <label className="block text-sm font-medium text-slate-600 mb-2">Amount</label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">PKR</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">{currency}</span>
                       <input
                         type="number"
                         placeholder="0.00"

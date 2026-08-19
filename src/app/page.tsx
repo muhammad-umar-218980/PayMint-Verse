@@ -10,7 +10,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   Play,
-  Pause,
   Users,
   Receipt,
   Scale,
@@ -249,8 +248,6 @@ function Nav() {
 }
 
 function Hero() {
-  const [playing, setPlaying] = useState(false);
-
   return (
     <section className="pm-hero">
       <div className="pm-hero-ornaments" aria-hidden>
@@ -284,14 +281,10 @@ function Hero() {
             <span>Create your group</span>
             <ArrowRight size={17} />
           </a>
-          <button
-            className="pm-btn-ghost"
-            onClick={() => setPlaying((v) => !v)}
-            data-cursor-text={playing ? "pause" : "play demo"}
-          >
-            <span className="pm-play-ico">{playing ? <Pause size={13} /> : <Play size={13} fill="currentColor" />}</span>
-            <span>Watch 45s demo</span>
-          </button>
+          <a href="#how" className="pm-btn-ghost" data-cursor-text="learn">
+            <span className="pm-play-ico"><Play size={13} fill="currentColor" /></span>
+            <span>See how it works</span>
+          </a>
         </div>
 
         <div className="pm-hero-mockup" data-reveal>
@@ -673,8 +666,8 @@ function AnalyticsSection() {
             The clearest picture of <em>where money actually goes.</em>
           </h2>
           <p className="pm-sec-sub" data-reveal>
-            Category breakdowns, monthly trends, per-person averages. Export any group to CSV in
-            one click for your own records or a shared accountant.
+            Category breakdowns at a glance, plus one-click CSV export of any group&rsquo;s
+            expenses for your own records or a shared accountant.
           </p>
         </div>
 
@@ -718,10 +711,10 @@ function AnalyticsSection() {
             <h4>What you unlock</h4>
             <ul>
               {[
-                "Live category donut & monthly trend charts",
-                "Per-member spend, owed and settled totals",
-                "Filter by group, date range or category",
-                "One-click CSV export for any date range",
+                "Live category donut for every group",
+                "Per-expense details with payer and split type",
+                "One-click CSV export of any group",
+                "Settlement history with payment methods",
               ].map((t) => (
                 <li key={t}><Check size={16} /> {t}</li>
               ))}
@@ -778,7 +771,7 @@ function FinalCTA() {
             team along in one link.
           </p>
           <div className="pm-cta-actions" data-reveal>
-            <a href="#" className="pm-btn-primary pm-btn-primary-lg" data-cursor-text="launch app">
+            <a href="/auth/login" className="pm-btn-primary pm-btn-primary-lg" data-cursor-text="launch app">
               <span>Launch PayMint Verse</span>
               <ArrowRight size={18} />
             </a>
@@ -824,16 +817,9 @@ function Footer() {
             <a href="#analytics">Analytics</a>
           </div>
           <div>
-            <h5>Company</h5>
-            <a href="#">About</a>
-            <a href="#">Blog</a>
-            <a href="#">Careers</a>
-          </div>
-          <div>
-            <h5>Legal</h5>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Security</a>
+            <h5>Get started</h5>
+            <a href="/auth/signup">Create account</a>
+            <a href="/auth/login">Sign in</a>
           </div>
         </div>
       </div>
@@ -1085,7 +1071,7 @@ function StyleTag() {
       .pm-footer-brand > span { display: flex; align-items: center; gap: 8px; font-weight: 600; }
       .pm-footer-brand em { font-style: normal; color: var(--primary); font-weight: 400; }
       .pm-footer-brand p { margin: 8px 0 0; font-size: 14px; color: rgba(6,46,35,0.55); max-width: 260px; }
-      .pm-footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+      .pm-footer-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
       .pm-footer-cols h5 { margin: 0 0 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: rgba(6,46,35,0.5); font-weight: 600; }
       .pm-footer-cols a { display: block; padding: 5px 0; font-size: 14px; color: var(--ink); text-decoration: none; transition: color .2s; }
       .pm-footer-cols a:hover { color: var(--primary); }

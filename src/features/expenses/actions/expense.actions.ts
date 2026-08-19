@@ -4,10 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { ExpenseService } from '../services/expense.service';
 import { ActivityService } from '@/features/activities/services/activity.service';
-import { SplitType } from '@/types';
+import { NotificationService } from '@/features/notifications/services/notification.service';
+import { Expense, SplitType } from '@/types';
 
 const expenseService = new ExpenseService();
 const activityService = new ActivityService();
+const notificationService = new NotificationService();
 
 export async function addExpenseAction(formData: FormData, splitType: SplitType, splitDetails: any[]) {
   const supabase = await createClient();
@@ -49,7 +51,25 @@ export async function addExpenseAction(formData: FormData, splitType: SplitType,
   }
 
   // Log activity
-  await activityService.logExpenseCreated(user.id, result as any);
+  await activityService.logExpenseCreated(user.id, result as Expense);
+
+  // Notify the other members of the group
+  const { data: group } = await supabase
+    .from('groups')
+    .select('name')
+    .eq('id', groupId)
+    .single();
+  const actorName = (user.user_metadata?.full_name as string) || 'Someone';
+  const members = await expenseService.getGroupMembers(groupId);
+  for (const member of members) {
+    if (member.user_id === user.id) continue;
+    await notificationService.send(
+      member.user_id,
+      'expense_added',
+      `${actorName} added "${title}" (${currency} ${amount.toLocaleString()}) in "${group?.name ?? 'your group'}"`,
+      (result as Expense).id
+    );
+  }
 
   revalidatePath(`/groups/${groupId}`);
   return { success: true };

@@ -11,6 +11,7 @@ interface SettleUpModalProps {
   transaction: { from: string; to: string; amount: number };
   membersMap: Record<string, string>;
   currentUserId: string;
+  currency?: string;
   className?: string;
   label?: string;
 }
@@ -26,7 +27,7 @@ const SETTLEMENT_METHODS: { id: SettlementMethod; label: string }[] = [
 const INPUT_CLASS =
   'w-full bg-[#F5F7F4] border border-[rgba(6,46,35,0.10)] px-4 py-3 rounded-xl text-ink placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all text-sm';
 
-export default function SettleUpModal({ groupId, transaction, membersMap, currentUserId, className, label }: SettleUpModalProps) {
+export default function SettleUpModal({ groupId, transaction, membersMap, currentUserId, currency = 'PKR', className, label }: SettleUpModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +56,7 @@ export default function SettleUpModal({ groupId, transaction, membersMap, curren
     }
 
     if (numAmount > transaction.amount) {
-      setError(`Amount cannot exceed the total debt (PKR ${transaction.amount}).`);
+      setError(`Amount cannot exceed the total debt (${currency} ${transaction.amount}).`);
       setLoading(false);
       return;
     }
@@ -123,7 +124,7 @@ export default function SettleUpModal({ groupId, transaction, membersMap, curren
                   <span className={isYouTo ? 'text-emerald-600' : 'text-slate-700'}>{toName}</span>
                 </div>
                 <div className="text-xs text-slate-500">
-                  Total Outstanding: <span className="font-serif tracking-tight text-ink">PKR {transaction.amount}</span>
+                  Total Outstanding: <span className="font-serif tracking-tight text-ink">{currency} {transaction.amount}</span>
                 </div>
               </div>
 
@@ -131,7 +132,7 @@ export default function SettleUpModal({ groupId, transaction, membersMap, curren
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-2">Amount to Settle</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">PKR</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">{currency}</span>
                     <input
                       type="number"
                       step="0.01"
