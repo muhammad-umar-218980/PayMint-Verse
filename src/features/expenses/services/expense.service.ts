@@ -37,7 +37,9 @@ export class ExpenseService {
     // Calculate splits based on type
     if (data.split_type === 'equal') {
       const memberIds = splitDetails as string[];
-      splits = calculateEqualSplit(data.amount, memberIds);
+      const result = calculateEqualSplit(data.amount, memberIds);
+      if (result.error) return { error: result.error };
+      splits = result.splits;
     } else if (data.split_type === 'custom') {
       const result = calculateCustomSplit(data.amount, splitDetails);
       if (result.error) return { error: result.error };
@@ -64,6 +66,10 @@ export class ExpenseService {
     }
 
     return expense;
+  }
+
+  async getExpense(expenseId: string) {
+    return expenseRepo.getExpenseWithSplits(expenseId);
   }
 
   async deleteExpense(expenseId: string): Promise<boolean> {

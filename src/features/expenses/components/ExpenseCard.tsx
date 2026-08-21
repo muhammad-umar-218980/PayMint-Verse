@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Expense, ExpenseSplit } from '@/types';
 import { Utensils, Fuel, Building, Ticket, Lightbulb, ShoppingBag, Receipt, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { deleteExpenseAction } from '../actions/expense.actions';
+import { toast } from 'sonner';
 
 interface ExpenseCardProps {
   expense: Expense & { payer: { full_name: string | null; email: string } };
@@ -32,8 +33,13 @@ export default function ExpenseCard({ expense, splits, membersMap, currentUserId
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this expense?')) return;
     setIsDeleting(true);
-    await deleteExpenseAction(expense.id, expense.group_id);
-    // Path revalidates, component unmounts
+    const result = await deleteExpenseAction(expense.id, expense.group_id);
+    if (result.error) {
+      toast.error(result.error);
+      setIsDeleting(false);
+    } else {
+      toast.success('Expense deleted successfully');
+    }
   };
 
   return (

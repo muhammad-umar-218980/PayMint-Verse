@@ -24,6 +24,8 @@ export const metadata: Metadata = {
   description: "The modern way to split expenses and settle debts.",
 };
 
+import { Toaster } from 'sonner';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,6 +38,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col font-sans antialiased">
         {children}
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

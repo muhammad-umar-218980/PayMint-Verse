@@ -50,25 +50,29 @@ export async function addExpenseAction(formData: FormData, splitType: SplitType,
     return { error: result.error };
   }
 
-  // Log activity
-  await activityService.logExpenseCreated(user.id, result as Expense);
+  try {
+    // Log activity
+    await activityService.logExpenseCreated(user.id, result as Expense);
 
-  // Notify the other members of the group
-  const { data: group } = await supabase
-    .from('groups')
-    .select('name')
-    .eq('id', groupId)
-    .single();
-  const actorName = (user.user_metadata?.full_name as string) || 'Someone';
-  const members = await expenseService.getGroupMembers(groupId);
-  for (const member of members) {
-    if (member.user_id === user.id) continue;
-    await notificationService.send(
-      member.user_id,
-      'expense_added',
-      `${actorName} added "${title}" (${currency} ${amount.toLocaleString()}) in "${group?.name ?? 'your group'}"`,
-      (result as Expense).id
-    );
+    // Notify the other members of the group
+    const { data: group } = await supabase
+      .from('groups')
+      .select('name')
+      .eq('id', groupId)
+      .single();
+    const actorName = (user.user_metadata?.full_name as string) || 'Someone';
+    const members = await expenseService.getGroupMembers(groupId);
+    for (const member of members) {
+      if (member.user_id === user.id) continue;
+      await notificationService.send(
+        member.user_id,
+        'expense_added',
+        `${actorName} added "${title}" (${currency} ${amount.toLocaleString()}) in "${group?.name ?? 'your group'}"`,
+        (result as Expense).id
+      );
+    }
+  } catch (error) {
+    console.error('Error during post-expense-creation side effects (activity/notification):', error);
   }
 
   revalidatePath(`/groups/${groupId}`);
@@ -83,6 +87,10 @@ export async function deleteExpenseAction(expenseId: string, groupId: string) {
     return { error: 'Not authenticated' };
   }
 
+  // Fetch expense title for meaningful activity log
+  const expenseData = await expenseService.getExpense(expenseId);
+  const expenseTitle = expenseData?.expense?.title || 'an expense';
+
   // We should verify if user is the payer or owner. For now RLS on delete handles this (only payer can delete).
   const success = await expenseService.deleteExpense(expenseId);
 
@@ -90,8 +98,12 @@ export async function deleteExpenseAction(expenseId: string, groupId: string) {
     return { error: 'Failed to delete expense or permission denied' };
   }
 
-  // Log activity
-  await activityService.logExpenseDeleted(user.id, groupId, 'an expense');
+  try {
+    // Log activity
+    await activityService.logExpenseDeleted(user.id, groupId, expenseTitle);
+  } catch (error) {
+    console.error('Error logging expense deletion:', error);
+  }
 
   revalidatePath(`/groups/${groupId}`);
   return { success: true };
