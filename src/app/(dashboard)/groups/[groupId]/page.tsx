@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { GroupService } from '@/features/groups/services/group.service';
 import { ExpenseService } from '@/features/expenses/services/expense.service';
 import { ExpenseRepository } from '@/features/expenses/repositories/expense.repository';
@@ -26,7 +27,26 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
   }
 
   const groupService = new GroupService();
-  const group = await groupService.getGroupDetails(groupId);
+  const { group, error } = await groupService.getGroupDetails(groupId);
+
+  if (error && error.code !== 'PGRST116') {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-6 pt-[80px]">
+        <div className="bg-white border border-line rounded-[26px] p-8 max-w-md w-full text-center shadow-[0_40px_80px_-40px_rgba(6,46,35,0.12)]">
+          <h1 className="font-serif text-2xl tracking-tight text-ink mb-2">Something went wrong</h1>
+          <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+            We couldn&apos;t load this group. This is usually a temporary issue — try again in a moment.
+          </p>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-ink text-paper text-sm font-semibold hover:bg-emerald-600 transition-colors"
+          >
+            Back to dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!group) {
     notFound();

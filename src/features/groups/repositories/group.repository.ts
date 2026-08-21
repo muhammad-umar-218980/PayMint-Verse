@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { Group, GroupMember } from '@/types';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export class GroupRepository {
   async getGroupsForUser(userId: string): Promise<Group[]> {
@@ -17,7 +18,7 @@ export class GroupRepository {
     return data.map((d: any) => d.groups as Group);
   }
 
-  async getGroupById(groupId: string): Promise<Group | null> {
+  async getGroupById(groupId: string): Promise<{ group: Group | null; error: PostgrestError | null }> {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('groups')
@@ -27,9 +28,9 @@ export class GroupRepository {
 
     if (error) {
       console.error('Error fetching group:', error);
-      return null;
+      return { group: null, error };
     }
-    return data as Group;
+    return { group: data as Group, error: null };
   }
 
   async createGroup(name: string, description: string, createdBy: string): Promise<Group | null> {

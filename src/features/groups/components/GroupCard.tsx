@@ -22,7 +22,7 @@ export default function GroupCard({ group, membersCount, expensesCount, netBalan
   const isOwner = currentUserId !== undefined && group.created_by === currentUserId;
 
   return (
-    <div className="flex items-center gap-2 px-4 sm:px-5 py-4 hover:bg-emerald-500/[0.04] transition-colors">
+    <div className="group flex items-center gap-2 px-4 sm:px-5 py-4 hover:bg-emerald-500/[0.04] transition-colors">
       <Link href={`/groups/${group.id}`} className="flex items-center gap-4 flex-1 min-w-0">
         <div className="w-11 h-11 rounded-xl bg-emerald-600/10 border border-emerald-600/15 flex items-center justify-center shrink-0">
           <Users className="w-5 h-5 text-emerald-600" />

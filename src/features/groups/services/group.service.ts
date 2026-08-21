@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { GroupRepository } from '../repositories/group.repository';
 import { Group } from '@/types';
+import { PostgrestError } from '@supabase/supabase-js';
 
 const groupRepo = new GroupRepository();
 
@@ -9,7 +10,7 @@ export class GroupService {
     return groupRepo.getGroupsForUser(userId);
   }
 
-  async getGroupDetails(groupId: string): Promise<Group | null> {
+  async getGroupDetails(groupId: string): Promise<{ group: Group | null; error: PostgrestError | null }> {
     return groupRepo.getGroupById(groupId);
   }
 
