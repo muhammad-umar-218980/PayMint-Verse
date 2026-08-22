@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Calculator, Percent, PieChart, Receipt } from 'lucide-react';
+import { toast } from 'sonner';
 import { addExpenseAction } from '../actions/expense.actions';
 import { SplitType, GroupMember } from '@/types';
 
@@ -139,7 +140,9 @@ export default function AddExpenseModal({ groupId, members, currentUserId, curre
 
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
     } else {
+      toast.success('Expense added successfully');
       setOpen(false);
       setTitle('');
       setDescription('');

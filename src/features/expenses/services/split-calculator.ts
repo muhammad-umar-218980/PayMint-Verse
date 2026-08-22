@@ -16,8 +16,8 @@ export interface SplitResult {
 export function calculateEqualSplit(
   totalAmount: number,
   memberIds: string[]
-): SplitResult[] {
-  if (memberIds.length === 0) return [];
+): { splits: SplitResult[]; error?: string } {
+  if (memberIds.length === 0) return { splits: [] };
 
   const perPerson = Math.floor((totalAmount / memberIds.length) * 100) / 100;
   const splits: SplitResult[] = memberIds.map((userId) => ({
@@ -28,12 +28,17 @@ export function calculateEqualSplit(
   // Fix rounding: last person absorbs the difference
   const distributed = perPerson * memberIds.length;
   const diff = Math.round((totalAmount - distributed) * 100) / 100;
+  
+  if (Math.abs(diff) > 1.0) {
+    return { splits: [], error: 'Rounding difference too large. Please check inputs.' };
+  }
+
   if (diff !== 0 && splits.length > 0) {
     splits[splits.length - 1].amount_owed =
       Math.round((splits[splits.length - 1].amount_owed + diff) * 100) / 100;
   }
 
-  return splits;
+  return { splits };
 }
 
 /**
@@ -88,6 +93,11 @@ export function calculatePercentageSplit(
   // Fix rounding on last person
   const distributed = splits.reduce((acc, s) => acc + s.amount_owed, 0);
   const diff = Math.round((totalAmount - distributed) * 100) / 100;
+  
+  if (Math.abs(diff) > 1.0) {
+    return { splits: [], error: 'Rounding difference too large. Please check percentages.' };
+  }
+
   if (diff !== 0 && splits.length > 0) {
     splits[splits.length - 1].amount_owed =
       Math.round((splits[splits.length - 1].amount_owed + diff) * 100) / 100;
@@ -119,6 +129,11 @@ export function calculateSharesSplit(
   // Fix rounding on last person
   const distributed = splits.reduce((acc, s) => acc + s.amount_owed, 0);
   const diff = Math.round((totalAmount - distributed) * 100) / 100;
+
+  if (Math.abs(diff) > 1.0) {
+    return { splits: [], error: 'Rounding difference too large. Please check shares.' };
+  }
+
   if (diff !== 0 && splits.length > 0) {
     splits[splits.length - 1].amount_owed =
       Math.round((splits[splits.length - 1].amount_owed + diff) * 100) / 100;

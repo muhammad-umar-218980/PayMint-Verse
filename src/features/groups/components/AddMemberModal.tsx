@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserPlus, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { addMemberAction } from '../actions/groups';
 
 export default function AddMemberModal({ groupId }: { groupId: string }) {
@@ -29,7 +30,9 @@ export default function AddMemberModal({ groupId }: { groupId: string }) {
 
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
     } else {
+      toast.success('Member added successfully');
       setOpen(false);
       router.refresh();
     }

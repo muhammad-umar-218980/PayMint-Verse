@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
+import { toast } from 'sonner';
 import { createGroup } from '@/features/groups/actions/groups';
 
 interface CreateGroupModalProps {
@@ -29,8 +30,10 @@ export default function CreateGroupModal({ triggerClassName, triggerLabel, trigg
 
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
       setLoading(false);
     } else {
+      toast.success('Group created successfully');
       setOpen(false);
       setName('');
       if (result.groupId) {

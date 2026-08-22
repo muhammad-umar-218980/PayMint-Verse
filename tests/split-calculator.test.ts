@@ -9,7 +9,7 @@ import {
 describe('calculateEqualSplit', () => {
   it('splits evenly across members', () => {
     const splits = calculateEqualSplit(100, ['a', 'b', 'c']);
-    expect(splits).toEqual([
+    expect(splits.splits).toEqual([
       { user_id: 'a', amount_owed: 33.33 },
       { user_id: 'b', amount_owed: 33.33 },
       { user_id: 'c', amount_owed: 33.34 },
@@ -18,17 +18,17 @@ describe('calculateEqualSplit', () => {
 
   it('last person absorbs the rounding difference', () => {
     const splits = calculateEqualSplit(100, ['a', 'b', 'c']);
-    const sum = splits.reduce((acc, s) => acc + s.amount_owed, 0);
+    const sum = splits.splits.reduce((acc, s) => acc + s.amount_owed, 0);
     expect(sum).toBeCloseTo(100, 2);
   });
 
   it('handles a single member (pays everything)', () => {
     const splits = calculateEqualSplit(42.5, ['a']);
-    expect(splits).toEqual([{ user_id: 'a', amount_owed: 42.5 }]);
+    expect(splits.splits).toEqual([{ user_id: 'a', amount_owed: 42.5 }]);
   });
 
   it('returns an empty array when there are no members', () => {
-    expect(calculateEqualSplit(100, [])).toEqual([]);
+    expect(calculateEqualSplit(100, [])).toEqual({ splits: [] });
   });
 });
 
