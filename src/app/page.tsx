@@ -866,7 +866,7 @@ function StyleTag() {
         box-shadow: 0 10px 30px -18px rgba(6,46,35,0.25);
       }
       .pm-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-      .pm-logo-img { height: 28px; width: auto; }
+      .pm-logo-img { height: 28px; width: 28px; object-fit: contain; border-radius: 8px; }
       .pm-brand-text { display: flex; align-items: center; gap: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
       .pm-pay { color: var(--ink); }
       .pm-mint { color: var(--primary); }
