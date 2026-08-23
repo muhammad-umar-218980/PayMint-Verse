@@ -10,8 +10,8 @@ import {
   X,
   LayoutGrid,
   Plus,
-  PanelLeftClose,
-  PanelLeftOpen,
+  ChevronsLeft,
+  ChevronsRight,
   Plane,
   HomeIcon,
   Users,
@@ -208,41 +208,51 @@ export default function DashboardSidebar({ user, avatarUrl, groups, children }: 
     <div className="min-h-screen bg-paper text-ink font-sans flex">
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-[#fbfcfb] border-r border-line flex flex-col z-40 hidden lg:flex transition-all duration-300 ${
+        className={`fixed top-0 left-0 h-screen bg-[#fbfcfb] border-r border-line flex flex-col z-40 hidden lg:flex transition-[width] duration-[350ms] ease-[cubic-bezier(0.65,0,0.35,1)] ${
           collapsed ? 'w-[76px]' : 'w-[240px]'
         }`}
       >
         <div
-          className={`h-[60px] flex items-center shrink-0 ${
-            collapsed ? 'justify-center' : 'justify-between gap-2 pl-4 pr-2'
+          className={`h-[72px] flex items-center shrink-0 ${
+            collapsed ? 'justify-center pt-4' : 'justify-between gap-2 pl-3 pr-1.5 pt-4'
           }`}
         >
           {collapsed ? (
-            <button
-              onClick={() => setCollapsed(false)}
-              title="Expand sidebar"
-              aria-label="Expand sidebar"
-              className="w-10 flex justify-center cursor-pointer"
-            >
-              <img src="/green logo.png" alt="Logo" className="w-6 h-6 rounded-md" />
-            </button>
+            <div className="pm-fade-in flex flex-col items-center gap-1">
+              <button
+                onClick={() => setCollapsed(false)}
+                title="Expand sidebar"
+                aria-label="Expand sidebar"
+                className="p-1 rounded-lg text-ink/40 hover:text-ink hover:bg-ink/[0.05] transition-colors cursor-pointer"
+              >
+                <ChevronsRight className="w-[18px] h-[18px]" />
+              </button>
+              <button
+                onClick={() => setCollapsed(false)}
+                title="Expand sidebar"
+                aria-label="Expand sidebar"
+                className="w-10 flex justify-center cursor-pointer"
+              >
+                <img src="/green logo.png" alt="Logo" className="w-6 h-6 rounded-md" />
+              </button>
+            </div>
           ) : (
             <>
-              <div className="flex items-center gap-2">
+              <div className="pm-fade-in flex items-center gap-2">
                 <img src="/green logo.png" alt="Logo" className="w-6 h-6 rounded-md shrink-0" />
-                <span className="text-[17px] font-semibold tracking-tight text-ink">
-                  Pay<span className="text-emerald-600">Mint</span>
+                <span className="text-[17px] font-semibold tracking-tight text-ink whitespace-nowrap">
+                  Pay<span className="text-emerald-600">Mint</span> Verse
                 </span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="pm-fade-in flex items-center gap-1">
                 <NotificationBell userId={user.id} />
                 <button
                   onClick={() => setCollapsed(true)}
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
-                  className="p-2 rounded-lg text-ink/40 hover:text-ink hover:bg-ink/[0.05] transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg text-ink/40 hover:text-ink hover:bg-ink/[0.05] transition-colors cursor-pointer"
                 >
-                  <PanelLeftClose className="w-[18px] h-[18px]" />
+                  <ChevronsLeft className="w-[18px] h-[18px]" />
                 </button>
               </div>
             </>
@@ -254,24 +264,12 @@ export default function DashboardSidebar({ user, avatarUrl, groups, children }: 
         <UserFooter user={user} avatarUrl={avatarUrl} initials={initials} collapsed={collapsed} />
       </aside>
 
-      {/* Collapsed rail — expand button pinned under header */}
-      {collapsed && (
-        <button
-          onClick={() => setCollapsed(false)}
-          title="Expand sidebar"
-          aria-label="Expand sidebar"
-          className="hidden lg:flex fixed left-[76px] top-[60px] translate-x-[-50%] w-6 h-6 rounded-full bg-white border border-line shadow-md items-center justify-center text-ink/50 hover:text-ink hover:border-ink/30 z-50 transition-colors cursor-pointer"
-        >
-          <PanelLeftOpen className="w-3.5 h-3.5" />
-        </button>
-      )}
-
       {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-[60px] bg-[#fbfcfb]/95 backdrop-blur-md border-b border-line flex items-center justify-between px-4 z-40">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-[60px] bg-[#fbfcfb]/95 backdrop-blur-md border-b border-line flex items-center justify-between px-4 pt-3 z-40">
         <div className="flex items-center gap-2">
           <img src="/green logo.png" alt="Logo" className="w-6 h-6 rounded-md" />
-          <span className="text-lg font-semibold tracking-tight text-ink">
-            Pay<span className="text-emerald-600">Mint</span>
+          <span className="text-lg font-semibold tracking-tight text-ink whitespace-nowrap">
+            Pay<span className="text-emerald-600">Mint</span> Verse
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -299,9 +297,9 @@ export default function DashboardSidebar({ user, avatarUrl, groups, children }: 
         <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
           <div className="absolute right-0 top-0 bottom-0 w-[300px] bg-[#fbfcfb] shadow-2xl flex flex-col">
-            <div className="px-5 h-[60px] flex items-center justify-between border-b border-line shrink-0">
-              <span className="text-lg font-semibold tracking-tight text-ink">
-                Pay<span className="text-emerald-600">Mint</span>
+            <div className="px-5 h-[60px] flex items-center justify-between border-b border-line shrink-0 pt-3">
+              <span className="text-lg font-semibold tracking-tight text-ink whitespace-nowrap">
+                Pay<span className="text-emerald-600">Mint</span> Verse
               </span>
               <button onClick={() => setMenuOpen(false)} className="p-2 text-ink/50 hover:text-ink cursor-pointer">
                 <X className="w-5 h-5" />
@@ -315,7 +313,7 @@ export default function DashboardSidebar({ user, avatarUrl, groups, children }: 
 
       {/* Main Content */}
       <main
-        className={`flex-1 ml-0 min-h-screen transition-[margin-left] duration-300 ${
+        className={`flex-1 ml-0 min-h-screen transition-[margin-left] duration-[350ms] ease-[cubic-bezier(0.65,0,0.35,1)] ${
           collapsed ? 'lg:ml-[76px]' : 'lg:ml-[240px]'
         }`}
       >

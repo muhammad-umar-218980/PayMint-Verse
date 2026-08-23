@@ -173,12 +173,12 @@ export default function AuthUI({ mode }: AuthUIProps) {
           <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
             <div className="flex items-center gap-3 mb-2">
               <img src="/green logo.png" alt="Logo" className="w-12 h-12" />
-              <span className="font-space text-3xl font-bold text-[#062E23]">
+              <span className="text-2xl font-semibold tracking-tight text-[#062E23]">
                 Pay<span className="text-[#059669]">Mint</span> Verse
               </span>
             </div>
 
-            <h1 className="font-space font-bold text-xl mb-3 text-[#062E23] tracking-tight">
+            <h1 className="font-serif text-2xl mb-3 text-[#062E23] tracking-tight">
               Create your account
             </h1>
 
@@ -296,12 +296,12 @@ export default function AuthUI({ mode }: AuthUIProps) {
           <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
             <div className="flex items-center gap-3 mb-2">
               <img src="/green logo.png" alt="Logo" className="w-12 h-12" />
-              <span className="font-space text-3xl font-bold text-[#062E23]">
+              <span className="text-2xl font-semibold tracking-tight text-[#062E23]">
                 Pay<span className="text-[#059669]">Mint</span> Verse
               </span>
             </div>
 
-            <h1 className="font-space font-bold text-xl text-[#062E23] tracking-tight mb-1">
+            <h1 className="font-serif text-2xl text-[#062E23] tracking-tight mb-1">
               Login
             </h1>
             <p className="text-[12px] text-[#062E23]/60 mb-4 font-medium">
@@ -407,7 +407,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 isRightPanelActive ? "translate-x-0" : "-translate-x-[20%]"
               }`}
             >
-              <h1 className="font-space font-bold text-3xl mb-3 text-white tracking-tight leading-tight">
+              <h1 className="font-serif text-4xl mb-3 text-white tracking-tight leading-tight">
                 Welcome Back!
               </h1>
               <p className="text-white/90 text-[13px] mb-6 leading-[1.6] font-medium max-w-[250px]">
@@ -432,7 +432,7 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 isRightPanelActive ? "translate-x-[20%]" : "translate-x-0"
               }`}
             >
-              <h1 className="font-space font-bold text-3xl mb-3 text-white tracking-tight leading-tight">
+              <h1 className="font-serif text-4xl mb-3 text-white tracking-tight leading-tight">
                 Hello, Friend!
               </h1>
               <p className="text-white/90 text-[13px] mb-6 leading-[1.6] font-medium max-w-[250px]">
