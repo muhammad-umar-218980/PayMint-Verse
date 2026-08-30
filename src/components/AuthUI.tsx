@@ -160,14 +160,14 @@ export default function AuthUI({ mode }: AuthUIProps) {
 
       {/* Main Container */}
       <div
-        className={`relative bg-white border border-[#062E23]/10 rounded-[2rem] shadow-[0_40px_80px_-30px_rgba(6,46,35,0.15)] overflow-hidden w-full max-w-[900px] min-h-[480px] transition-all duration-700 z-10 mx-4`}
+        className={`relative bg-white border border-[#062E23]/10 rounded-[2rem] shadow-[0_40px_80px_-30px_rgba(6,46,35,0.15)] overflow-hidden w-full max-w-[900px] min-h-[580px] md:min-h-[480px] transition-all duration-700 z-10 mx-4`}
       >
         {/* Sign Up Container */}
         <div
-          className={`absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out ${
+          className={`absolute top-0 h-full w-full md:w-1/2 left-0 transition-all duration-700 ease-in-out ${
             isRightPanelActive
-              ? "translate-x-full opacity-100 z-50"
-              : "opacity-0 z-10 pointer-events-none"
+              ? "translate-x-0 md:translate-x-full opacity-100 z-50 pointer-events-auto"
+              : "-translate-x-full md:translate-x-0 opacity-0 z-10 pointer-events-none"
           }`}
         >
           <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
@@ -281,16 +281,31 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 <GoogleIcon className="w-4 h-4" />
                 Continue with Google
               </button>
+
+              <div className="md:hidden mt-5 text-[13px] text-[#062E23]/70 font-medium">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRightPanelActive(false);
+                    setError(null);
+                    setSuccessMsg(null);
+                  }}
+                  className="text-[#059669] hover:underline font-semibold"
+                >
+                  Login
+                </button>
+              </div>
             </form>
           </div>
         </div>
 
         {/* Sign In Container */}
         <div
-          className={`absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out z-20 ${
+          className={`absolute top-0 h-full w-full md:w-1/2 left-0 transition-all duration-700 ease-in-out z-20 ${
             isRightPanelActive
-              ? "translate-x-full opacity-0 pointer-events-none"
-              : "opacity-100"
+              ? "translate-x-full md:translate-x-full opacity-0 pointer-events-none"
+              : "translate-x-0 md:translate-x-0 opacity-100 pointer-events-auto"
           }`}
         >
           <div className="bg-white flex flex-col items-center justify-center px-6 sm:px-8 h-full text-center">
@@ -382,13 +397,28 @@ export default function AuthUI({ mode }: AuthUIProps) {
                 <GoogleIcon className="w-4 h-4" />
                 Continue with Google
               </button>
+
+              <div className="md:hidden mt-5 text-[13px] text-[#062E23]/70 font-medium">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRightPanelActive(true);
+                    setError(null);
+                    setSuccessMsg(null);
+                  }}
+                  className="text-[#059669] hover:underline font-semibold"
+                >
+                  Sign Up
+                </button>
+              </div>
             </form>
           </div>
         </div>
 
         {/* Overlay Container */}
         <div
-          className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-[100] ${
+          className={`hidden md:block absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-[100] ${
             isRightPanelActive ? "-translate-x-full" : ""
           }`}
         >
