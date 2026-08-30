@@ -287,7 +287,7 @@ function Hero() {
           </a>
         </div>
 
-        <div className="pm-hero-mockup" data-reveal>
+        <div className="pm-hero-mockup hidden md:block" data-reveal>
           <HeroAppMockup />
         </div>
       </div>
@@ -1137,6 +1137,12 @@ function StyleTag() {
       .pm-cta-chip strong { display: block; font-size: 14px; font-weight: 600; color: var(--paper); }
       .pm-cta-chip span { display: block; margin-top: 4px; font-size: 12.5px; color: rgba(245,247,244,0.6); }
       @media (max-width: 780px) { .pm-cta-chips { grid-template-columns: 1fr; } }
+
+      /* Mobile (<768px): hide mockup URL pill; drop Splits section entirely */
+      @media (max-width: 767px) {
+        .pm-mockup-url { display: none; }
+        .pm-split { display: none; }
+      }
     `}</style>
   );
 }
